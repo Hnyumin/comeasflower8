@@ -1,0 +1,210 @@
+*{ box-sizing:border-box; }
+html, body{
+  margin:0; width:100%; height:100%;
+  overflow:hidden;
+  font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  background:#e5e3e3; color:#231d1a;
+}
+
+/* 광장 */
+.stage{ position:fixed; inset:0; background:#e5e3e3; z-index:0; }
+#canvas{ position:absolute; inset:0; }
+
+/* 패널 */
+.panel{
+  position:fixed;
+  left:20px; top:20px;
+  z-index:10;
+  width:320px;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  padding:12px;
+}
+.panel h1{ font-size:16px; margin:0 0 10px 0; }
+
+.desc{
+  font-size:14px; line-height:1.4;
+  border:1px solid #231d1a;
+  padding:10px;
+  background:#d9d9d9;
+  margin-bottom:12px;
+}
+
+/* ✅ 드롭다운 토글 버튼 */
+.dropdown-btn{
+  width:100%;
+  padding:12px;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  font-weight:900;
+  cursor:pointer;
+  margin-bottom:16px;
+}
+
+/* 드롭다운 바디 */
+.panel-body{ display:none; }
+.panel.open .panel-body{ display:block; }
+
+.group{ margin-bottom:10px; }
+.group-title{ font-weight:700; font-size:14px; margin:0 0 6px 0; }
+
+.options{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:6px;
+}
+
+/* 옵션 버튼 */
+.option{
+  width:34px; height:46px;
+  border:none;
+  background:#e5e3e3;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex:0 0 auto;
+}
+.option img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  pointer-events:none;
+}
+.option.selected{
+  outline:2px solid #231d1a;
+  outline-offset:2px;
+}
+
+/* 입력 */
+label{
+  font-size:15px;
+  font-weight:700;
+  margin-top:10px;
+  display:block;
+}
+input, textarea{
+  width:100%;
+  border:1px solid #231d1a;
+  padding:6px;
+  margin-top:4px;
+  font-size:12px;
+  outline:none;
+}
+textarea{ height:90px; resize:none; }
+
+/* 전송 버튼 */
+.send-btn{
+  width:100%;
+  margin-top:10px;
+  padding:14px 12px;
+  background:#d9d9d9;
+  color:#231d1a;
+  border:2px solid #231d1a;
+  cursor:pointer;
+  font-size:16px;
+  font-weight:700;
+}
+
+/* 프리뷰 */
+.preview-panel{
+  position:fixed;
+  left: calc(20px + 320px + 12px);
+  top:20px;
+  z-index:10;
+  width:160px;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  padding:12px;
+}
+.preview-box{
+  width:100%;
+  height:260px;
+  background:#e5e3e3;
+  position:relative;
+  overflow:hidden;
+}
+:root{ --preview-size: 78px; }
+.preview-box .layer{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  width:var(--preview-size);
+  height:auto;
+  display:none;
+}
+.preview-box .layer.flower{ top: -10px; }
+.preview-box .layer.stem{   top: 65px; }
+.preview-box .layer.pot{    top: 150px; }
+
+/* 툴팁 */
+.tooltip{
+  position:absolute;
+  background:#d9d9d9;
+  border:1px solid #231d1a;
+  color:#231d1a;
+  padding:8px 10px;
+  line-height:1.25;
+  display:none;
+  pointer-events:none;
+  min-width:120px;
+  max-width:220px;
+  z-index:20;
+}
+.tooltip .msg{ font-weight:700; font-size:12px; margin-bottom:4px; }
+.tooltip .from{ font-weight:700; font-size:10px; opacity:0.85; }
+
+/* 모달 */
+.modal{
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(2px);
+}
+.modal.show{ display:flex; }
+.modal-card{
+  width: 280px;
+  background: #e5e3e3;
+  border: 2px solid #231d1a;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 14px;
+}
+.modal-title{ font-weight:900; font-size:14px; margin-bottom:8px; }
+.modal-msg{
+  font-size:12px; line-height:1.4;
+  border:1px solid #231d1a;
+  background:#d9d9d9;
+  padding:10px;
+}
+.modal-btn{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  background:#d9d9d9;
+  border:2px solid #231d1a;
+  font-weight:900;
+  cursor:pointer;
+}
+
+/* 🔥 레이어 충돌 해결 */
+#canvas{
+  position:absolute;
+  inset:0;
+  z-index:1;
+}
+
+.panel,
+.preview-panel,
+.modal{
+  position:fixed;
+  z-index:1000;
+}
