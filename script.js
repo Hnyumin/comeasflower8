@@ -138,6 +138,18 @@ document.querySelectorAll(".options").forEach((row)=>{
   });
 });
 
+function isOverlapping(x, y) {
+  for (const p of pots) {
+
+    const overlapX = Math.abs(x - p.x) < 130;  // 좌우 폭
+    const overlapY = Math.abs(y - p.y) < 240;  // 위아래 높이
+
+    if (overlapX && overlapY) {
+      return true;
+    }
+  }
+  return false;
+}
 /* =========================
    ✅ 전송
 ========================= */
@@ -150,9 +162,18 @@ sendBtn.addEventListener("click", async ()=>{
     return;
   }
 
-  const newPot = {
-    x: random(160, width - 160) - camX,
-    y: random(260, height - 120) - camY,
+ let x, y;
+let attempts = 0;
+
+do {
+  x = random(160, width - 160) - camX;
+  y = random(260, height - 120) - camY;
+  attempts++;
+} while (isOverlapping(x, y) && attempts < 200);
+
+const newPot = {
+  x,
+  y,
     flowerIdx: selected.flowerIdx,
     stemIdx: selected.stemIdx,
     potIdx: selected.potIdx,
