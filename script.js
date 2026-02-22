@@ -44,7 +44,7 @@ const POT_PATHS = [
 /* =========================
    ✅ 상태
 ========================= */
-let pots = lsLoad(LS_KEY, []);
+let pots = [];
 let selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
 
 let camX = 0, camY = 0;
@@ -182,7 +182,6 @@ const newPot = {
   };
 
   pots.push(newPot);
-  lsSave(LS_KEY, pots);
 
   // Supabase 저장
   await sb.from("pots").insert([{
@@ -234,6 +233,8 @@ function setup(){
   c.parent("canvas");
   imageMode(CENTER);
   cursor("grab");
+  
+  loadFromSupabase();
 }
 
 /* =========================
@@ -271,6 +272,11 @@ function draw(){
 
   if(showIndex !== -1){
     const p = pots[showIndex];
+  
+    // 🔥 이름과 메세지 둘 다 없으면 툴팁 안 띄움
+    if(!p.msg && (!p.name || p.name === "익명")) {
+      return;
+    }
     const sx = p.x + camX;
     const sy = p.y + camY;
 
@@ -334,4 +340,23 @@ function mouseDragged(){
 function mouseReleased(){
   isPanning = false;
   cursor("grab");
+}
+
+async function loadFromSupabase(){
+  const { data, error } = await sb.from("pots").select("*");
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  pots = data.map(p => ({
+    x: p.x,
+    y: p.y,
+    flowerIdx: p.flower_idx,
+    stemIdx: p.stem_idx,
+    potIdx: p.pot_idx,
+    name: p.name,
+    msg: p.msg
+  }));
 }
