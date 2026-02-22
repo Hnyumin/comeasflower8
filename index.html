@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>꽃표 방명록</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <!-- 광장(배경) -->
+  <main class="stage">
+    <div id="tooltip" class="tooltip"></div>
+    <div id="canvas"></div>
+  </main>
+
+  <!-- 옵션 선택창 -->
+  <aside class="panel" id="panel">
+    <h1>⇧ shift + 8 = *</h1>
+
+    <div class="desc">
+      shift의 화살표와 8, 그리고 꽃표가 만나면 어떻게 될까요? 나만의 화분을 만들어 여덟 번째 꽃밤에 축하 꽃을 보내주세요!
+    </div>
+
+    <!-- ✅ 드롭다운 버튼(따로) -->
+    <button id="dropdownBtn" class="dropdown-btn" type="button" aria-expanded="false">
+      ▼
+    </button>
+
+    <!-- ✅ 드롭다운 영역 -->
+    <div class="panel-body" id="panelBody" aria-hidden="true">
+
+      <div class="group">
+        <div class="group-title">꽃</div>
+        <div class="options" data-type="flower">
+          <button class="option" data-value="0" type="button"><img src="assets/flower01.svg" alt=""></button>
+          <button class="option" data-value="1" type="button"><img src="assets/flower02.svg" alt=""></button>
+          <button class="option" data-value="2" type="button"><img src="assets/flower03.svg" alt=""></button>
+          <button class="option" data-value="3" type="button"><img src="assets/flower04.svg" alt=""></button>
+          <button class="option" data-value="4" type="button"><img src="assets/flower05.svg" alt=""></button>
+          <button class="option" data-value="5" type="button"><img src="assets/flower06.svg" alt=""></button>
+          <button class="option" data-value="6" type="button"><img src="assets/flower07.svg" alt=""></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">줄기</div>
+        <div class="options" data-type="stem">
+          <button class="option" data-value="0" type="button"><img src="assets/stem01.svg" alt=""></button>
+          <button class="option" data-value="1" type="button"><img src="assets/stem02.svg" alt=""></button>
+          <button class="option" data-value="2" type="button"><img src="assets/stem03.svg" alt=""></button>
+          <button class="option" data-value="3" type="button"><img src="assets/stem04.svg" alt=""></button>
+          <button class="option" data-value="4" type="button"><img src="assets/stem05.svg" alt=""></button>
+          <button class="option" data-value="5" type="button"><img src="assets/stem06.svg" alt=""></button>
+          <button class="option" data-value="6" type="button"><img src="assets/stem07.svg" alt=""></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">화분</div>
+        <div class="options" data-type="pot">
+          <button class="option" data-value="0" type="button"><img src="assets/pot01.svg" alt=""></button>
+          <button class="option" data-value="1" type="button"><img src="assets/pot02.svg" alt=""></button>
+          <button class="option" data-value="2" type="button"><img src="assets/pot03.svg" alt=""></button>
+          <button class="option" data-value="3" type="button"><img src="assets/pot04.svg" alt=""></button>
+          <button class="option" data-value="4" type="button"><img src="assets/pot05.svg" alt=""></button>
+          <button class="option" data-value="5" type="button"><img src="assets/pot06.svg" alt=""></button>
+          <button class="option" data-value="6" type="button"><img src="assets/pot07.svg" alt=""></button>
+        </div>
+      </div>
+
+      <label for="name">보내는 사람</label>
+      <input id="name" placeholder="이름" maxlength="18" />
+
+      <label for="msg">축하의 말</label>
+      <textarea id="msg" placeholder="메세지를 남겨보세요" maxlength="120"></textarea>
+
+      <!-- ✅ 실제 전송 버튼(따로) -->
+      <button id="sendBtn" class="send-btn" type="button">화분 보내기</button>
+    </div>
+  </aside>
+
+  <!-- 프리뷰 창 -->
+  <aside class="preview-panel" aria-hidden="true">
+    <div class="preview-box" id="previewBox">
+      <img class="layer flower" id="prevFlower" src="" alt="">
+      <img class="layer stem"   id="prevStem"   src="" alt="">
+      <img class="layer pot"    id="prevPot"    src="" alt="">
+    </div>
+  </aside>
+
+  <!-- 팝업 -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <div class="modal-msg">꽃 · 줄기 · 화분을 모두 선택해 주세요.</div>
+      <button id="modalClose" class="modal-btn" type="button">확인</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
