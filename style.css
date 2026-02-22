@@ -25,21 +25,24 @@ html, body{
 
 .desc{
   font-size:14px; line-height:1.4;
-  border:1px solid #231d1a;
+  border:2px solid #231d1a;
   padding:10px;
-  background:#d9d9d9;
+  background:#e5e3e3;
   margin-bottom:12px;
+  color:#231d1a;
+  font-weight: 600;
 }
 
 /* ✅ 드롭다운 토글 버튼 */
 .dropdown-btn{
   width:100%;
   padding:12px;
-  background:#e5e3e3;
+  background:#231d1a;
   border:2px solid #231d1a;
   font-weight:900;
   cursor:pointer;
   margin-bottom:16px;
+  color:#e5e3e3;
 }
 
 /* 드롭다운 바디 */
@@ -68,6 +71,7 @@ html, body{
   cursor:pointer;
   flex:0 0 auto;
 }
+
 .option img{
   width:100%;
   height:100%;
@@ -75,9 +79,9 @@ html, body{
   display:block;
   pointer-events:none;
 }
+
 .option.selected{
-  outline:2px solid #231d1a;
-  outline-offset:2px;
+  box-shadow: inset 0 0 0 2px #231d1a;
 }
 
 /* 입력 */
@@ -89,11 +93,12 @@ label{
 }
 input, textarea{
   width:100%;
-  border:1px solid #231d1a;
+  border:2px solid #231d1a;
   padding:6px;
   margin-top:4px;
   font-size:12px;
   outline:none;
+  background:#e5e3e3;
 }
 textarea{ height:90px; resize:none; }
 
@@ -102,8 +107,8 @@ textarea{ height:90px; resize:none; }
   width:100%;
   margin-top:10px;
   padding:14px 12px;
-  background:#d9d9d9;
-  color:#231d1a;
+  background:#231d1a;
+  color:#e5e3e3;
   border:2px solid #231d1a;
   cursor:pointer;
   font-size:16px;
@@ -167,7 +172,7 @@ textarea{ height:90px; resize:none; }
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.65);
+  background: #e5e3e3;
   backdrop-filter: blur(2px);
 }
 .modal.show{ display:flex; }
@@ -180,19 +185,20 @@ textarea{ height:90px; resize:none; }
 }
 .modal-title{ font-weight:900; font-size:14px; margin-bottom:8px; }
 .modal-msg{
-  font-size:12px; line-height:1.4;
-  border:1px solid #231d1a;
-  background:#d9d9d9;
+  font-size:14px; line-height:1.4;
+  font-weight:700;
+  background:#e5e3e3;
   padding:10px;
 }
 .modal-btn{
   width:100%;
   margin-top:10px;
   padding:12px;
-  background:#d9d9d9;
+  background:#e5e3e3;
   border:2px solid #231d1a;
-  font-weight:900;
+  font-weight:800;
   cursor:pointer;
+  font-size:13px
 }
 
 /* 🔥 레이어 충돌 해결 */
