@@ -150,8 +150,8 @@ textarea{ height:90px; resize:none; }
 /* 툴팁 */
 .tooltip{
   position:absolute;
-  background:#d9d9d9;
-  border:1px solid #231d1a;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
   color:#231d1a;
   padding:8px 10px;
   line-height:1.25;
@@ -214,3 +214,5 @@ textarea{ height:90px; resize:none; }
   position:fixed;
   z-index:1000;
 }
+#canvas { z-index:0; }
+.panel, .preview-panel, .modal { z-index:10; }
