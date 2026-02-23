@@ -115,26 +115,35 @@ textarea{ height:90px; resize:none; }
   font-weight:700;
 }
 
-/* 프리뷰 */
+/* =========================
+   ✅ 프리뷰 (179px 기준으로 비율 유지 축소)
+========================= */
 .preview-panel{
   position:fixed;
   left: calc(20px + 320px + 12px);
   top:20px;
   z-index:10;
-  width:160px;
+
+  /* 🔥 160 -> 110 (260->179 비율로 축소) */
+  width:110px;
+
   background:#e5e3e3;
   border:2px solid #231d1a;
   box-shadow:0 10px 30px rgba(0,0,0,0.08);
   padding:12px;
 }
+
 .preview-box{
   width:100%;
-  height:260px;
+  height:179px;
   background:#e5e3e3;
   position:relative;
   overflow:hidden;
 }
-:root{ --preview-size: 78px; }
+
+/* 🔥 78 -> 54 (동일 비율 축소) */
+:root{ --preview-size: 54px; }
+
 .preview-box .layer{
   position:absolute;
   left:50%;
@@ -143,9 +152,11 @@ textarea{ height:90px; resize:none; }
   height:auto;
   display:none;
 }
-.preview-box .layer.flower{ top: -10px; }
-.preview-box .layer.stem{   top: 65px; }
-.preview-box .layer.pot{    top: 150px; }
+
+/* 🔥 top 값도 축소 비율로 재조정 */
+.preview-box .layer.flower{ top: -7px; }
+.preview-box .layer.stem{   top: 45px; }
+.preview-box .layer.pot{    top: 103px; }
 
 /* 툴팁 */
 .tooltip{
@@ -201,18 +212,6 @@ textarea{ height:90px; resize:none; }
   font-size:13px
 }
 
-/* 🔥 레이어 충돌 해결 */
-#canvas{
-  position:absolute;
-  inset:0;
-  z-index:1;
-}
-
-.panel,
-.preview-panel,
-.modal{
-  position:fixed;
-  z-index:1000;
-}
-#canvas { z-index:0; }
-.panel, .preview-panel, .modal { z-index:10; }
+/* 🔥 레이어 충돌 해결 (최소 구성만 유지) */
+#canvas{ position:absolute; inset:0; z-index:0; }
+.panel, .preview-panel, .modal{ position:fixed; z-index:10; }
