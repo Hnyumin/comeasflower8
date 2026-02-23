@@ -6,36 +6,16 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* =========================
-   ✅ 로컬 저장
-========================= */
-const LS_KEY = "flower_guestbook_pots_v1";
-
-function lsLoad(key, fallback){
-  try{
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  }catch(e){
-    return fallback;
-  }
-}
-
-function lsSave(key, value){
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-/* =========================
    ✅ SVG 경로
 ========================= */
 const FLOWER_PATHS = [
   "assets/flower01.svg","assets/flower02.svg","assets/flower03.svg",
   "assets/flower04.svg","assets/flower05.svg","assets/flower06.svg","assets/flower07.svg",
 ];
-
 const STEM_PATHS = [
   "assets/stem01.svg","assets/stem02.svg","assets/stem03.svg",
   "assets/stem04.svg","assets/stem05.svg","assets/stem06.svg","assets/stem07.svg",
 ];
-
 const POT_PATHS = [
   "assets/pot01.svg","assets/pot02.svg","assets/pot03.svg",
   "assets/pot04.svg","assets/pot05.svg","assets/pot06.svg","assets/pot07.svg",
@@ -50,12 +30,10 @@ let selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
 let camX = 0, camY = 0;
 let isPanning = false;
 
-/* 🔥 5초 메시지용 */
 let pinnedIndex = -1;
 let pinnedExpireAt = 0;
 const PIN_DURATION = 5000;
 
-/* 이미지 버퍼 */
 let FLOWERS = new Array(7).fill(null);
 let STEMS   = new Array(7).fill(null);
 let POTS    = new Array(7).fill(null);
@@ -64,7 +42,6 @@ let POTS    = new Array(7).fill(null);
    ✅ DOM
 ========================= */
 const panel = document.getElementById("panel");
-const panelBody = document.getElementById("panelBody");
 const dropdownBtn = document.getElementById("dropdownBtn");
 const sendBtn = document.getElementById("sendBtn");
 
@@ -80,100 +57,106 @@ const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modalClose");
 
 /* =========================
-   ✅ 드롭다운
+   ✅ 안전 체크 (JS가 여기서 터지면 "아무것도 안 눌림" 됨)
 ========================= */
-dropdownBtn.addEventListener("click", ()=>{
-  const isOpen = panel.classList.toggle("open");
-  dropdownBtn.textContent = isOpen ? "▲" : "▼";
-});
+function assertDOM(){
+  const ok =
+    panel && dropdownBtn && sendBtn &&
+    tooltip && nameInput && msgInput &&
+    prevFlower && prevStem && prevPot &&
+    modal && modalClose;
+
+  if(!ok){
+    console.error("❌ DOM id가 하나 이상 없거나 script가 너무 일찍 실행됨. HTML id 확인해줘.");
+  }
+  return ok;
+}
 
 /* =========================
-   ✅ 모달
+   ✅ 드롭다운 + 모달
 ========================= */
-function openModal(){ modal.classList.add("show"); }
-function closeModal(){ modal.classList.remove("show"); }
+if(assertDOM()){
+  dropdownBtn.addEventListener("click", ()=>{
+    const isOpen = panel.classList.toggle("open");
+    dropdownBtn.textContent = isOpen ? "▲" : "▼";
+  });
 
-modalClose.addEventListener("click", closeModal);
-modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
+  function openModal(){ modal.classList.add("show"); }
+  function closeModal(){ modal.classList.remove("show"); }
+
+  modalClose.addEventListener("click", closeModal);
+  modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
+
+  // 옵션 선택
+  document.querySelectorAll(".options").forEach((row)=>{
+    row.addEventListener("click",(e)=>{
+      const btn = e.target.closest(".option");
+      if(!btn) return;
+
+      const type = row.dataset.type;
+
+      row.querySelectorAll(".option").forEach(el=>el.classList.remove("selected"));
+      btn.classList.add("selected");
+
+      selected[type + "Idx"] = parseInt(btn.dataset.value, 10);
+      updatePreview();
+    });
+  });
+
+  // 전송
+  sendBtn.addEventListener("click", onSend);
+
+  // 초기 프리뷰
+  updatePreview();
+}
 
 /* =========================
    ✅ 프리뷰
 ========================= */
 function updatePreview(){
-  if(selected.flowerIdx === -1){ prevFlower.style.display="none"; }
-  else {
-    prevFlower.style.display="block";
-    prevFlower.src = FLOWER_PATHS[selected.flowerIdx];
-  }
+  if(!prevFlower || !prevStem || !prevPot) return;
 
-  if(selected.stemIdx === -1){ prevStem.style.display="none"; }
-  else {
-    prevStem.style.display="block";
-    prevStem.src = STEM_PATHS[selected.stemIdx];
-  }
+  if(selected.flowerIdx === -1){ prevFlower.style.display="none"; prevFlower.removeAttribute("src"); }
+  else { prevFlower.style.display="block"; prevFlower.src = FLOWER_PATHS[selected.flowerIdx]; }
 
-  if(selected.potIdx === -1){ prevPot.style.display="none"; }
-  else {
-    prevPot.style.display="block";
-    prevPot.src = POT_PATHS[selected.potIdx];
-  }
+  if(selected.stemIdx === -1){ prevStem.style.display="none"; prevStem.removeAttribute("src"); }
+  else { prevStem.style.display="block"; prevStem.src = STEM_PATHS[selected.stemIdx]; }
+
+  if(selected.potIdx === -1){ prevPot.style.display="none"; prevPot.removeAttribute("src"); }
+  else { prevPot.style.display="block"; prevPot.src = POT_PATHS[selected.potIdx]; }
 }
-updatePreview();
 
 /* =========================
-   ✅ 옵션 선택
+   ✅ 겹침 판정 (박스)
 ========================= */
-document.querySelectorAll(".options").forEach((row)=>{
-  row.addEventListener("click",(e)=>{
-    const btn = e.target.closest(".option");
-    if(!btn) return;
+const HIT_W = 130;  // 좌우
+const HIT_H = 240;  // 상하
 
-    const type = row.dataset.type;
-
-    row.querySelectorAll(".option").forEach(el=>el.classList.remove("selected"));
-    btn.classList.add("selected");
-
-    selected[type + "Idx"] = parseInt(btn.dataset.value, 10);
-    updatePreview();
-  });
-});
-
-function isOverlapping(x, y) {
-  for (const p of pots) {
-
-    const overlapX = Math.abs(x - p.x) < 130;  // 좌우 폭
-    const overlapY = Math.abs(y - p.y) < 240;  // 위아래 높이
-
-    if (overlapX && overlapY) {
-      return true;
-    }
+function isOverlapping(x, y){
+  for(const p of pots){
+    if(Math.abs(x - p.x) < HIT_W && Math.abs(y - p.y) < HIT_H) return true;
   }
   return false;
 }
+
 /* =========================
    ✅ 전송
 ========================= */
-sendBtn.addEventListener("click", async ()=>{
-
-  if(selected.flowerIdx === -1 ||
-     selected.stemIdx   === -1 ||
-     selected.potIdx    === -1){
-    openModal();
+async function onSend(){
+  if(selected.flowerIdx === -1 || selected.stemIdx === -1 || selected.potIdx === -1){
+    modal.classList.add("show");
     return;
   }
 
- let x, y;
-let attempts = 0;
+  let x, y, attempts = 0;
+  do{
+    x = random(160, width - 160) - camX;
+    y = random(260, height - 120) - camY;
+    attempts++;
+  } while(isOverlapping(x, y) && attempts < 400);
 
-do {
-  x = random(160, width - 160) - camX;
-  y = random(260, height - 120) - camY;
-  attempts++;
-} while (isOverlapping(x, y) && attempts < 200);
-
-const newPot = {
-  x,
-  y,
+  const newPot = {
+    x, y,
     flowerIdx: selected.flowerIdx,
     stemIdx: selected.stemIdx,
     potIdx: selected.potIdx,
@@ -181,10 +164,15 @@ const newPot = {
     msg: msgInput.value.trim() || ""
   };
 
+  // 화면 즉시 반영
   pots.push(newPot);
 
-  // Supabase 저장
-  await sb.from("pots").insert([{
+  // 5초 툴팁 고정
+  pinnedIndex = pots.length - 1;
+  pinnedExpireAt = millis() + PIN_DURATION;
+
+  // 서버 저장
+  const { error } = await sb.from("pots").insert([{
     x: newPot.x,
     y: newPot.y,
     flower_idx: newPot.flowerIdx,
@@ -194,29 +182,32 @@ const newPot = {
     msg: newPot.msg
   }]);
 
-  // 🔥 5초 메시지 표시
-  pinnedIndex = pots.length - 1;
-  pinnedExpireAt = millis() + PIN_DURATION;
+  if(error) console.error("insert error:", error);
 
+  // 입력칸 비우기
+  nameInput.value = "";
+  msgInput.value = "";
+
+  // 드롭다운 닫기
   panel.classList.remove("open");
   dropdownBtn.textContent = "▼";
 
+  // 선택 리셋
   selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
   document.querySelectorAll(".option.selected").forEach(el=>el.classList.remove("selected"));
   updatePreview();
-});
+}
 
 /* =========================
    ✅ p5 preload
 ========================= */
 function preload(){
   const safeLoad = (path, arr, i)=>{
-    loadImage(path,
-      img=>arr[i]=img,
-      ()=>arr[i]=null
-    );
+    loadImage(path, img=>arr[i]=img, err=>{
+      console.error("이미지 로드 실패:", path, err);
+      arr[i]=null;
+    });
   };
-
   for(let i=0;i<7;i++){
     safeLoad(FLOWER_PATHS[i], FLOWERS, i);
     safeLoad(STEM_PATHS[i], STEMS, i);
@@ -229,12 +220,28 @@ function preload(){
 ========================= */
 function setup(){
   const stage = document.querySelector(".stage");
-  const c = createCanvas(stage.clientWidth, stage.clientHeight);
-  c.parent("canvas");
+  const wrap = document.getElementById("canvas");
+
+  const w = stage ? stage.clientWidth : window.innerWidth;
+  const h = stage ? stage.clientHeight : window.innerHeight;
+
+  const c = createCanvas(w, h);
+
+  // 여기서 wrap이 null이면 _curElement.elt 에러 남
+  if(wrap) c.parent(wrap);
+  else console.error("❌ #canvas div가 HTML에 없음. id='canvas' 확인!");
+
   imageMode(CENTER);
   cursor("grab");
-  
+
   loadFromSupabase();
+}
+
+function windowResized(){
+  const stage = document.querySelector(".stage");
+  const w = stage ? stage.clientWidth : window.innerWidth;
+  const h = stage ? stage.clientHeight : window.innerHeight;
+  resizeCanvas(w, h);
 }
 
 /* =========================
@@ -266,17 +273,18 @@ function draw(){
 
   pop();
 
+  if(!tooltip) return;
   tooltip.style.display = "none";
 
   const showIndex = (hovered !== -1) ? hovered : pinnedIndex;
-
   if(showIndex !== -1){
     const p = pots[showIndex];
-  
-    // 🔥 이름과 메세지 둘 다 없으면 툴팁 안 띄움
-    if(!p.msg && (!p.name || p.name === "익명")) {
-      return;
-    }
+
+    // 이름/메시지 둘다 의미없으면 툴팁 안띄움
+    const hasMsg = !!(p.msg && p.msg.trim());
+    const hasName = !!(p.name && p.name.trim() && p.name !== "익명");
+    if(!hasMsg && !hasName) return;
+
     const sx = p.x + camX;
     const sy = p.y + camY;
 
@@ -284,8 +292,8 @@ function draw(){
     tooltip.style.left = `${sx + 50}px`;
     tooltip.style.top  = `${sy - 170}px`;
     tooltip.innerHTML = `
-      <div class="msg">${p.msg || "(메세지 없음)"}</div>
-     <div class="from">from. ${p.name || "익명"}</div>
+      <div class="msg">${escapeHtml(p.msg || "")}</div>
+      <div class="from">from. ${escapeHtml(p.name || "익명")}</div>
     `;
   }
 }
@@ -296,19 +304,18 @@ function draw(){
 function drawImageKeepRatio(img, x, y, targetW){
   if(!img || img.width===0 || img.height===0) return;
   const ratio = img.height / img.width;
-  const targetH = targetW * ratio;
-  image(img, x, y, targetW, targetH);
+  image(img, x, y, targetW, targetW * ratio);
 }
 
 function drawPot(p){
   push();
   translate(p.x, p.y);
 
-  const BASE = 80;
-
-  drawImageKeepRatio(POTS[p.potIdx], 0, 0, BASE);
-  drawImageKeepRatio(STEMS[p.stemIdx], 0, -70, BASE);
-  drawImageKeepRatio(FLOWERS[p.flowerIdx], 0, -140, BASE);
+  const BASE = 70;
+  // ✅ 이미지가 null일 수 있으니 체크 후만 그리기
+  if(POTS[p.potIdx]) drawImageKeepRatio(POTS[p.potIdx], 0, 0, BASE);
+  if(STEMS[p.stemIdx]) drawImageKeepRatio(STEMS[p.stemIdx], 0, -70, BASE);
+  if(FLOWERS[p.flowerIdx]) drawImageKeepRatio(FLOWERS[p.flowerIdx], 0, -140, BASE);
 
   pop();
 }
@@ -318,39 +325,33 @@ function drawPot(p){
 ========================= */
 function mousePressed(){
   const el = document.elementFromPoint(mouseX, mouseY);
-
-  if(el && (
-     el.closest(".panel") ||
-     el.closest(".preview-panel") ||
-     el.closest(".modal")
-  )){
-    return;
-  }
+  if(el && (el.closest(".panel") || el.closest(".preview-panel") || el.closest(".modal"))) return;
 
   isPanning = true;
   cursor("grabbing");
 }
-
 function mouseDragged(){
   if(!isPanning) return;
   camX += movedX;
   camY += movedY;
 }
-
 function mouseReleased(){
   isPanning = false;
   cursor("grab");
 }
 
+/* =========================
+   ✅ Supabase 로드
+========================= */
 async function loadFromSupabase(){
   const { data, error } = await sb.from("pots").select("*");
 
   if(error){
-    console.error(error);
+    console.error("load error:", error);
     return;
   }
 
-  pots = data.map(p => ({
+  pots = (data || []).map(p => ({
     x: p.x,
     y: p.y,
     flowerIdx: p.flower_idx,
@@ -359,4 +360,16 @@ async function loadFromSupabase(){
     name: p.name,
     msg: p.msg
   }));
+}
+
+/* =========================
+   ✅ 안전 문자열
+========================= */
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
