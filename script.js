@@ -314,7 +314,7 @@ function drawPot(p){
   const BASE = 70;
   // ✅ 이미지가 null일 수 있으니 체크 후만 그리기
   if(POTS[p.potIdx]) drawImageKeepRatio(POTS[p.potIdx], 0, 0, BASE);
-  if(STEMS[p.stemIdx]) drawImageKeepRatio(STEMS[p.stemIdx], 0, -70, BASE);
+  if(STEMS[p.stemIdx]) drawImageKeepRatio(STEMS[p.stemIdx], 0, -75, BASE);
   if(FLOWERS[p.flowerIdx]) drawImageKeepRatio(FLOWERS[p.flowerIdx], 0, -140, BASE);
 
   pop();
