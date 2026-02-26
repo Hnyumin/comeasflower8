@@ -290,3 +290,9 @@ textarea{
 /* ✅ 레이어 */
 #canvas{ z-index:0; }
 .panel, .preview-panel, .modal{ z-index:10; }
+
+/* ✅ 기본은 프리뷰 숨김 */
+.preview-panel { display:none; }
+
+/* ✅ 옵션창 열렸을 때만 프리뷰 보이기 */
+.panel.open + .preview-panel { display:block; }
