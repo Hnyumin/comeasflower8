@@ -1,3 +1,5 @@
+let cursorRadius = 18;   // 원 크기 (조절 가능)
+
 /* =========================
    ✅ Supabase 연결
 ========================= */
@@ -40,9 +42,6 @@ let FLOWERS = new Array(7).fill(null);
 let STEMS   = new Array(7).fill(null);
 let POTS    = new Array(7).fill(null);
 
-/* 화분 크기(모니터 따라 자동) */
-let BASE_SIZE = 80;
-
 /* =========================
    ✅ DOM
 ========================= */
@@ -82,13 +81,13 @@ modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
    ✅ 프리뷰
 ========================= */
 function updatePreview(){
-  if(selected.flowerIdx === -1){ prevFlower.style.display="none"; }
+  if(selected.flowerIdx === -1){ prevFlower.style.display="none"; prevFlower.removeAttribute("src"); }
   else { prevFlower.style.display="block"; prevFlower.src = FLOWER_PATHS[selected.flowerIdx]; }
 
-  if(selected.stemIdx === -1){ prevStem.style.display="none"; }
+  if(selected.stemIdx === -1){ prevStem.style.display="none"; prevStem.removeAttribute("src"); }
   else { prevStem.style.display="block"; prevStem.src = STEM_PATHS[selected.stemIdx]; }
 
-  if(selected.potIdx === -1){ prevPot.style.display="none"; }
+  if(selected.potIdx === -1){ prevPot.style.display="none"; prevPot.removeAttribute("src"); }
   else { prevPot.style.display="block"; prevPot.src = POT_PATHS[selected.potIdx]; }
 }
 updatePreview();
@@ -102,6 +101,7 @@ document.querySelectorAll(".options").forEach((row)=>{
     if(!btn) return;
 
     const type = row.dataset.type;
+
     row.querySelectorAll(".option").forEach(el=>el.classList.remove("selected"));
     btn.classList.add("selected");
 
@@ -111,35 +111,26 @@ document.querySelectorAll(".options").forEach((row)=>{
 });
 
 /* =========================
-   ✅ 화분 크기 자동 계산
-   - 화면 높이 기준(아이맥에서 너무 작아 보이는 문제 해결)
+   ✅ 겹침 방지 (사각형 기준)
+   - BASE를 줄였으니 겹침 판정도 살짝 줄여줌
 ========================= */
-function updateBaseSize(){
-  const raw = height * 0.085;        // 화면 높이의 8.5%
-  BASE_SIZE = constrain(raw, 60, 120); // 너무 작/큰 것 제한
-}
-
-/* =========================
-   ✅ 겹침 판정(사각형)
-   - BASE_SIZE 기반으로 히트박스도 같이 스케일
-========================= */
-function isOverlapping(x, y){
-  const hitW = BASE_SIZE * 1.6; // 가로
-  const hitH = BASE_SIZE * 3.0; // 세로(꽃까지 포함)
-  for(const p of pots){
-    const overlapX = Math.abs(x - p.x) < hitW;
-    const overlapY = Math.abs(y - p.y) < hitH;
-    if(overlapX && overlapY) return true;
+function isOverlapping(x, y) {
+  for (const p of pots) {
+    const overlapX = Math.abs(x - p.x) < 105;  // ← 약간 줄임(이전 130)
+    const overlapY = Math.abs(y - p.y) < 195;  // ← 약간 줄임(이전 240)
+    if (overlapX && overlapY) return true;
   }
   return false;
 }
 
 /* =========================
-   ✅ 전송 (겹치지 않는 위치 찾기)
+   ✅ 전송
 ========================= */
 sendBtn.addEventListener("click", async ()=>{
 
-  if(selected.flowerIdx === -1 || selected.stemIdx === -1 || selected.potIdx === -1){
+  if(selected.flowerIdx === -1 ||
+     selected.stemIdx   === -1 ||
+     selected.potIdx    === -1){
     openModal();
     return;
   }
@@ -147,11 +138,11 @@ sendBtn.addEventListener("click", async ()=>{
   let x, y;
   let attempts = 0;
 
-  do{
+  do {
     x = random(160, width - 160) - camX;
     y = random(260, height - 120) - camY;
     attempts++;
-  }while(isOverlapping(x, y) && attempts < 250);
+  } while (isOverlapping(x, y) && attempts < 250);
 
   const newPot = {
     x, y,
@@ -162,7 +153,7 @@ sendBtn.addEventListener("click", async ()=>{
     msg: msgInput.value.trim() || ""
   };
 
-  // 화면에 바로 추가
+  // 화면에 즉시 반영
   pots.push(newPot);
 
   // Supabase 저장
@@ -178,56 +169,34 @@ sendBtn.addEventListener("click", async ()=>{
 
   if(error) console.error(error);
 
-  // 5초 툴팁 고정
+  // 🔥 5초 메시지 표시
   pinnedIndex = pots.length - 1;
   pinnedExpireAt = millis() + PIN_DURATION;
 
-  // 드롭다운 닫기
+  // UI 닫기/리셋
   panel.classList.remove("open");
   dropdownBtn.textContent = "▼";
 
-  // 입력칸 비우기
-  nameInput.value = "";
-  msgInput.value  = "";
-
-  // 선택 리셋
   selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
   document.querySelectorAll(".option.selected").forEach(el=>el.classList.remove("selected"));
   updatePreview();
+
+  // ✅ 입력칸 비우기
+  nameInput.value = "";
+  msgInput.value  = "";
 });
-
-/* =========================
-   ✅ Supabase 불러오기
-========================= */
-async function loadFromSupabase(){
-  const { data, error } = await sb
-    .from("pots")
-    .select("*")
-    .order("created_at", { ascending: true });
-
-  if(error){
-    console.error(error);
-    return;
-  }
-
-  pots = (data || []).map(p => ({
-    x: p.x,
-    y: p.y,
-    flowerIdx: p.flower_idx,
-    stemIdx: p.stem_idx,
-    potIdx: p.pot_idx,
-    name: p.name,
-    msg: p.msg
-  }));
-}
 
 /* =========================
    ✅ p5 preload
 ========================= */
 function preload(){
   const safeLoad = (path, arr, i)=>{
-    loadImage(path, img=>arr[i]=img, ()=>arr[i]=null);
+    loadImage(path,
+      img=>arr[i]=img,
+      ()=>arr[i]=null
+    );
   };
+
   for(let i=0;i<7;i++){
     safeLoad(FLOWER_PATHS[i], FLOWERS, i);
     safeLoad(STEM_PATHS[i], STEMS, i);
@@ -242,19 +211,15 @@ function setup(){
   const stage = document.querySelector(".stage");
   const c = createCanvas(stage.clientWidth, stage.clientHeight);
   c.parent("canvas");
-
-  pixelDensity(2);
   imageMode(CENTER);
   cursor("grab");
 
-  updateBaseSize();
   loadFromSupabase();
 }
 
 function windowResized(){
   const stage = document.querySelector(".stage");
   resizeCanvas(stage.clientWidth, stage.clientHeight);
-  updateBaseSize();
 }
 
 /* =========================
@@ -274,35 +239,42 @@ function draw(){
   const wx = mouseX - camX;
   const wy = mouseY - camY;
 
+  // ✅ 화분 그리기 + hover 판정
+  // BASE 80 → 60으로 줄였으니 판정도 같이 축소
   for(let i=0;i<pots.length;i++){
     const p = pots[i];
     drawPot(p);
 
-    // hover 판정(대략 영역)
-    if(wx > p.x - BASE_SIZE*0.75 && wx < p.x + BASE_SIZE*0.75 &&
-       wy > p.y - BASE_SIZE*2.1  && wy < p.y + BASE_SIZE*0.2){
+    if(wx > p.x - 45 && wx < p.x + 45 &&
+       wy > p.y - 165 && wy < p.y + 8){
       hovered = i;
     }
   }
 
   pop();
 
+  /* =========================
+   ✅ 커스텀 커서
+========================= */
+noStroke();
+fill(35, 29, 26, 70);   // #231d1a + 투명도
+circle(mouseX, mouseY, cursorRadius * 2);
+
   tooltip.style.display = "none";
 
   const showIndex = (hovered !== -1) ? hovered : pinnedIndex;
-
   if(showIndex !== -1){
     const p = pots[showIndex];
 
-    // 이름/메시지 둘 다 없으면 툴팁 안 띄움
+    // ✅ 이름/메세지 둘 다 비었으면 툴팁 안 뜨게
     if(!p.msg && (!p.name || p.name === "익명")) return;
 
     const sx = p.x + camX;
     const sy = p.y + camY;
 
     tooltip.style.display = "block";
-    tooltip.style.left = `${sx + BASE_SIZE*0.7}px`;
-    tooltip.style.top  = `${sy - BASE_SIZE*2.1}px`;
+    tooltip.style.left = `${sx + 38}px`;
+    tooltip.style.top  = `${sy - 128}px`;
     tooltip.innerHTML = `
       <div class="msg">${escapeHtml(p.msg || "(메세지 없음)")}</div>
       <div class="from">from. ${escapeHtml(p.name || "익명")}</div>
@@ -316,20 +288,22 @@ function draw(){
 function drawImageKeepRatio(img, x, y, targetW){
   if(!img || img.width===0 || img.height===0) return;
   const ratio = img.height / img.width;
-  image(img, x, y, targetW, targetW * ratio);
+  const targetH = targetW * ratio;
+  image(img, x, y, targetW, targetH);
 }
 
+/* =========================
+   ✅ 화분 3레이어 그리기 (🔥 크기 줄임)
+========================= */
 function drawPot(p){
   push();
   translate(p.x, p.y);
 
-  const BASE = BASE_SIZE;
+  const BASE = 60;   // ✅ 광장 화분 크기: 80 → 60 (조금 줄임)
 
-  // ✅ stem 위치 "살짝 위로"는 여기 숫자만 조절하면 됨
-  // -BASE*0.90 → 더 위로 올리고 싶으면 0.95~1.05 사이로 올려봐
-  drawImageKeepRatio(POTS[p.potIdx],   0,  0,           BASE);
-  drawImageKeepRatio(STEMS[p.stemIdx], 0, -BASE*0.90,   BASE);
-  drawImageKeepRatio(FLOWERS[p.flowerIdx], 0, -BASE*1.80, BASE);
+  drawImageKeepRatio(POTS[p.potIdx],     0,    0, BASE);
+  drawImageKeepRatio(STEMS[p.stemIdx],   0,  -52, BASE);
+  drawImageKeepRatio(FLOWERS[p.flowerIdx],0, -105, BASE);
 
   pop();
 }
@@ -339,7 +313,13 @@ function drawPot(p){
 ========================= */
 function mousePressed(){
   const el = document.elementFromPoint(mouseX, mouseY);
-  if(el && (el.closest(".panel") || el.closest(".preview-panel") || el.closest(".modal"))) return;
+  if(el && (
+    el.closest(".panel") ||
+    el.closest(".preview-panel") ||
+    el.closest(".modal")
+  )){
+    return;
+  }
   isPanning = true;
   cursor("grabbing");
 }
@@ -351,6 +331,27 @@ function mouseDragged(){
 function mouseReleased(){
   isPanning = false;
   cursor("grab");
+}
+
+/* =========================
+   ✅ Supabase에서 불러오기
+========================= */
+async function loadFromSupabase(){
+  const { data, error } = await sb.from("pots").select("*");
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  pots = (data || []).map(p => ({
+    x: p.x,
+    y: p.y,
+    flowerIdx: p.flower_idx,
+    stemIdx: p.stem_idx,
+    potIdx: p.pot_idx,
+    name: p.name,
+    msg: p.msg
+  }));
 }
 
 /* =========================
