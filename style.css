@@ -10,69 +10,69 @@ html, body{
 .stage{ position:fixed; inset:0; background:#e5e3e3; z-index:0; }
 #canvas{ position:absolute; inset:0; }
 
-/* 패널(옵션창) — ✅ 1.5배 정도 커지게 전체 값 조정 */
+/* =========================
+   옵션창 (그대로 유지)
+========================= */
 .panel{
   position:fixed;
   left:20px; top:20px;
   z-index:10;
-
-  width:480px;           /* 320 * 1.5 */
+  width:480px;
   background:#e5e3e3;
   border:2px solid #231d1a;
   box-shadow:0 10px 30px rgba(0,0,0,0.08);
-  padding:18px;          /* 12 * 1.5 */
+  padding:18px;
 }
 .panel h1{
-  font-size:24px;        /* 16 * 1.5 */
+  font-size:24px;
   margin:0 0 14px 0;
 }
 
 .desc{
-  font-size:21px;        /* 14 * 1.5 */
+  font-size:21px;
   line-height:1.45;
   border:2px solid #231d1a;
-  padding:15px;          /* 10 * 1.5 */
+  padding:15px;
   background:#e5e3e3;
-  margin-bottom:18px;    /* 12 * 1.5 */
+  margin-bottom:18px;
   color:#231d1a;
   font-weight:600;
 }
 
-/* 드롭다운 토글 버튼 */
+/* 드롭다운 버튼 */
 .dropdown-btn{
   width:100%;
-  padding:18px;          /* 12 * 1.5 */
+  padding:18px;
   background:#231d1a;
   border:2px solid #231d1a;
   font-weight:900;
   cursor:pointer;
-  margin-bottom:24px;    /* 16 * 1.5 */
+  margin-bottom:24px;
   color:#e5e3e3;
   font-size:18px;
 }
 
-/* 드롭다운 바디 */
 .panel-body{ display:none; }
 .panel.open .panel-body{ display:block; }
 
 .group{ margin-bottom:15px; }
 .group-title{
   font-weight:700;
-  font-size:21px;        /* 14 * 1.5 */
+  font-size:21px;
   margin:0 0 9px 0;
 }
 
 .options{
   display:flex;
-  gap:12px;              /* 8 * 1.5 */
+  gap:12px;
   overflow-x:auto;
   padding-bottom:9px;
 }
 
 /* 옵션 버튼 */
 .option{
-  width:51px;            /* 34 * 1.5 */
-  height:69px;           /* 46 * 1.5 */
+  width:51px;
+  height:69px;
   border:none;
   background:#e5e3e3;
   padding:0;
@@ -81,8 +81,6 @@ html, body{
   justify-content:center;
   cursor:pointer;
   flex:0 0 auto;
-
-  /* 잘림 방지 */
   overflow:visible;
 }
 .option img{
@@ -92,15 +90,13 @@ html, body{
   display:block;
   pointer-events:none;
 }
-
-/* ✅ 선택 표시: border 대신 inset shadow로 내부 크기 안 줄어듦 */
 .option.selected{
   box-shadow: inset 0 0 0 3px #231d1a;
 }
 
 /* 입력 */
 label{
-  font-size:22px;        /* 15 * 1.5 */
+  font-size:22px;
   font-weight:700;
   margin-top:15px;
   display:block;
@@ -108,14 +104,14 @@ label{
 input, textarea{
   width:100%;
   border:2px solid #231d1a;
-  padding:9px;           /* 6 * 1.5 */
+  padding:9px;
   margin-top:6px;
-  font-size:18px;        /* 12 * 1.5 */
+  font-size:18px;
   outline:none;
   background:#e5e3e3;
 }
 textarea{
-  height:135px;          /* 90 * 1.5 */
+  height:135px;
   resize:none;
 }
 
@@ -123,34 +119,40 @@ textarea{
 .send-btn{
   width:100%;
   margin-top:15px;
-  padding:21px 18px;     /* 14/12 * 1.5 */
+  padding:21px 18px;
   background:#231d1a;
   color:#e5e3e3;
   border:2px solid #231d1a;
   cursor:pointer;
-  font-size:24px;        /* 16 * 1.5 */
+  font-size:24px;
   font-weight:700;
 }
 
-/* 프리뷰(요청 없어서 유지) */
+/* =========================
+   🔥 프리뷰박스 옵션창 비율 맞춰 확대
+========================= */
 .preview-panel{
   position:fixed;
-  left: calc(20px + 480px + 12px); /* ✅ 옵션창 폭 반영 */
+  left: calc(20px + 480px + 18px);
   top:20px;
   z-index:10;
-  width:160px;
+
+  width:240px;      /* 160 → 240 (1.5배 비율 맞춤) */
   background:#e5e3e3;
   border:2px solid #231d1a;
   box-shadow:0 10px 30px rgba(0,0,0,0.08);
-  padding:12px;
+  padding:18px;
 }
+
 .preview-box{
-  height:179px;
+  height:270px;     /* 179 → 비율 확대 */
   background:#e5e3e3;
   position:relative;
   overflow:hidden;
 }
-:root{ --preview-size: 78px; }
+
+:root{ --preview-size: 120px; }  /* 78 → 120 */
+
 .preview-box .layer{
   position:absolute;
   left:50%;
@@ -159,28 +161,40 @@ textarea{
   height:auto;
   display:none;
 }
-.preview-box .layer.flower{ top: -10px; }
-.preview-box .layer.stem{   top: 65px; }
-.preview-box .layer.pot{    top: 150px; }
+.preview-box .layer.flower{ top:-15px; }
+.preview-box .layer.stem{   top:100px; }
+.preview-box .layer.pot{    top:190px; }
 
-/* 툴팁 */
+/* =========================
+   🔥 호버 메시지 박스 살짝 확대
+========================= */
 .tooltip{
   position:absolute;
   background:#e5e3e3;
   border:2px solid #231d1a;
   color:#231d1a;
-  padding:10px 12px;
-  line-height:1.25;
+  padding:14px 16px;     /* 증가 */
+  line-height:1.3;
   display:none;
   pointer-events:none;
-  min-width:150px;
-  max-width:260px;
+  min-width:200px;       /* 증가 */
+  max-width:320px;
   z-index:20;
 }
-.tooltip .msg{ font-weight:700; font-size:14px; margin-bottom:6px; }
-.tooltip .from{ font-weight:700; font-size:12px; opacity:0.85; }
+.tooltip .msg{
+  font-weight:700;
+  font-size:18px;        /* 14 → 18 */
+  margin-bottom:8px;
+}
+.tooltip .from{
+  font-weight:700;
+  font-size:15px;        /* 12 → 15 */
+  opacity:0.85;
+}
 
-/* 모달 */
+/* =========================
+   🔥 모달 박스 살짝 확대
+========================= */
 .modal{
   position: fixed;
   inset: 0;
@@ -192,29 +206,32 @@ textarea{
   backdrop-filter: blur(2px);
 }
 .modal.show{ display:flex; }
+
 .modal-card{
-  width: 320px;
+  width:380px;     /* 320 → 380 */
   background: #e5e3e3;
   border: 2px solid #231d1a;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  padding: 16px;
+  padding:22px;
 }
+
 .modal-msg{
-  font-size:16px;
+  font-size:20px;  /* 16 → 20 */
   line-height:1.4;
   font-weight:700;
   background:#e5e3e3;
-  padding:12px;
+  padding:14px;
 }
+
 .modal-btn{
   width:100%;
-  margin-top:12px;
-  padding:14px;
+  margin-top:14px;
+  padding:18px;
   background:#e5e3e3;
   border:2px solid #231d1a;
   font-weight:800;
   cursor:pointer;
-  font-size:14px;
+  font-size:18px;
 }
 
 /* 레이어 */
