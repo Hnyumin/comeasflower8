@@ -1,125 +1,80 @@
-/* =========================
-   ✅ UI 스케일: 모니터 크기에 따라 비율만 변화
-   - 1440x900(맥북) 기준으로 잡고
-   - 너무 작아지거나 커지지 않게 clamp
-========================= */
-:root{
-  --ui-scale: clamp(0.90, min(100vw / 1440, 100vh / 900), 1.25);
-  --bg: #e5e3e3;
-  --fg: #231d1a;
-}
-
-/* ✅ 핵심: 전체 UI는 rem 기반이므로
-   html 폰트 크기만 스케일하면
-   "크기는 유지 + 비율만" 자동으로 변함 */
-html{
-  font-size: calc(16px * var(--ui-scale));
-}
-
 *{ box-sizing:border-box; }
-
 html, body{
-  margin:0;
-  width:100%;
-  height:100%;
+  margin:0; width:100%; height:100%;
   overflow:hidden;
   font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
-  background:var(--bg);
-  color:var(--fg);
+  background:#e5e3e3; color:#231d1a;
 }
 
-/* =========================
-   ✅ 광장
-========================= */
-.stage{
-  position:fixed;
-  inset:0;
-  background:var(--bg);
-  z-index:0;
-}
-#canvas{
-  position:absolute;
-  inset:0;
-  z-index:0;
-}
+/* 광장 */
+.stage{ position:fixed; inset:0; background:#e5e3e3; z-index:0; }
+#canvas{ position:absolute; inset:0; }
 
-/* =========================
-   ✅ 패널(옵션)
-   (기존 320px, 20px 위치를 rem으로 유지)
-========================= */
+/* 패널(옵션창) — ✅ 1.5배 정도 커지게 전체 값 조정 */
 .panel{
   position:fixed;
-  left:1.25rem;  /* 20px */
-  top:1.25rem;
+  left:20px; top:20px;
   z-index:10;
-  width:20rem;   /* 320px */
-  background:var(--bg);
-  border:0.125rem solid var(--fg); /* 2px */
-  box-shadow:0 0.625rem 1.875rem rgba(0,0,0,0.08);
-  padding:0.75rem; /* 12px */
-}
 
+  width:480px;           /* 320 * 1.5 */
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  padding:18px;          /* 12 * 1.5 */
+}
 .panel h1{
-  font-size:1rem; /* 16px */
-  margin:0 0 0.625rem 0;
+  font-size:24px;        /* 16 * 1.5 */
+  margin:0 0 14px 0;
 }
 
 .desc{
-  font-size:0.875rem; /* 14px */
-  line-height:1.4;
-  border:0.125rem solid var(--fg);
-  padding:0.625rem;
-  background:var(--bg);
-  margin-bottom:0.75rem;
-  color:var(--fg);
+  font-size:21px;        /* 14 * 1.5 */
+  line-height:1.45;
+  border:2px solid #231d1a;
+  padding:15px;          /* 10 * 1.5 */
+  background:#e5e3e3;
+  margin-bottom:18px;    /* 12 * 1.5 */
+  color:#231d1a;
   font-weight:600;
 }
 
-/* 드롭다운 버튼 */
+/* 드롭다운 토글 버튼 */
 .dropdown-btn{
   width:100%;
-  padding:0.75rem;
-  background:var(--fg);
-  border:0.125rem solid var(--fg);
+  padding:18px;          /* 12 * 1.5 */
+  background:#231d1a;
+  border:2px solid #231d1a;
   font-weight:900;
   cursor:pointer;
-  margin-bottom:1rem;
-  color:var(--bg);
+  margin-bottom:24px;    /* 16 * 1.5 */
+  color:#e5e3e3;
+  font-size:18px;
 }
 
 /* 드롭다운 바디 */
 .panel-body{ display:none; }
 .panel.open .panel-body{ display:block; }
 
-.group{ margin-bottom:0.625rem; }
+.group{ margin-bottom:15px; }
 .group-title{
   font-weight:700;
-  font-size:0.875rem; /* 14px */
-  margin:0 0 0.375rem 0;
+  font-size:21px;        /* 14 * 1.5 */
+  margin:0 0 9px 0;
 }
 
-/* 옵션 리스트 */
 .options{
   display:flex;
-  gap:0.5rem; /* 8px */
+  gap:12px;              /* 8 * 1.5 */
   overflow-x:auto;
-  padding-bottom:0.375rem;
-
-  /* ✅ "이동바(스크롤바)" 숨기기 */
-  scrollbar-width:none;           /* Firefox */
-  -ms-overflow-style:none;        /* IE/Edge */
-}
-.options::-webkit-scrollbar{      /* Chrome/Safari */
-  height:0;
-  display:none;
+  padding-bottom:9px;
 }
 
 /* 옵션 버튼 */
 .option{
-  width:2.125rem;  /* 34px */
-  height:2.875rem; /* 46px */
+  width:51px;            /* 34 * 1.5 */
+  height:69px;           /* 46 * 1.5 */
   border:none;
-  background:var(--bg);
+  background:#e5e3e3;
   padding:0;
   display:flex;
   align-items:center;
@@ -127,10 +82,9 @@ html, body{
   cursor:pointer;
   flex:0 0 auto;
 
-  /* ✅ 선택 테두리(inside) 잘림 방지 */
-  border-radius:0.25rem;
+  /* 잘림 방지 */
+  overflow:visible;
 }
-
 .option img{
   width:100%;
   height:100%;
@@ -139,74 +93,64 @@ html, body{
   pointer-events:none;
 }
 
-/* ✅ border 쓰면 안쪽이 줄어드니까
-   inset shadow로 “안쪽 테두리”를 줘서 크기 변화 없이 표시 */
+/* ✅ 선택 표시: border 대신 inset shadow로 내부 크기 안 줄어듦 */
 .option.selected{
-  box-shadow: inset 0 0 0 0.125rem var(--fg); /* 2px */
+  box-shadow: inset 0 0 0 3px #231d1a;
 }
 
 /* 입력 */
 label{
-  font-size:0.9375rem; /* 15px */
+  font-size:22px;        /* 15 * 1.5 */
   font-weight:700;
-  margin-top:0.625rem;
+  margin-top:15px;
   display:block;
 }
-
 input, textarea{
   width:100%;
-  border:0.125rem solid var(--fg);
-  padding:0.375rem;
-  margin-top:0.25rem;
-  font-size:0.75rem; /* 12px */
+  border:2px solid #231d1a;
+  padding:9px;           /* 6 * 1.5 */
+  margin-top:6px;
+  font-size:18px;        /* 12 * 1.5 */
   outline:none;
-  background:var(--bg);
+  background:#e5e3e3;
 }
-
 textarea{
-  height:5.625rem; /* 90px */
+  height:135px;          /* 90 * 1.5 */
   resize:none;
 }
 
 /* 전송 버튼 */
 .send-btn{
   width:100%;
-  margin-top:0.625rem;
-  padding:0.875rem 0.75rem;
-  background:var(--fg);
-  color:var(--bg);
-  border:0.125rem solid var(--fg);
+  margin-top:15px;
+  padding:21px 18px;     /* 14/12 * 1.5 */
+  background:#231d1a;
+  color:#e5e3e3;
+  border:2px solid #231d1a;
   cursor:pointer;
-  font-size:1rem;
+  font-size:24px;        /* 16 * 1.5 */
   font-weight:700;
 }
 
-/* =========================
-   ✅ 프리뷰 패널 (기존 크기 유지)
-========================= */
+/* 프리뷰(요청 없어서 유지) */
 .preview-panel{
   position:fixed;
-  left: calc(1.25rem + 20rem + 0.75rem); /* 20px + 320px + 12px */
-  top:1.25rem;
+  left: calc(20px + 480px + 12px); /* ✅ 옵션창 폭 반영 */
+  top:20px;
   z-index:10;
-  width:10rem; /* 160px */
-  background:var(--bg);
-  border:0.125rem solid var(--fg);
-  box-shadow:0 0.625rem 1.875rem rgba(0,0,0,0.08);
-  padding:0.75rem;
+  width:160px;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  padding:12px;
 }
-
 .preview-box{
-  width:100%;
-  height:16.25rem; /* ✅ 260px (작아지지 않게 원복) */
-  background:var(--bg);
+  height:179px;
+  background:#e5e3e3;
   position:relative;
   overflow:hidden;
 }
-
-/* 프리뷰 에셋 크기 */
-:root{ --preview-size: 4.875rem; } /* 78px */
-
+:root{ --preview-size: 78px; }
 .preview-box .layer{
   position:absolute;
   left:50%;
@@ -215,84 +159,68 @@ textarea{
   height:auto;
   display:none;
 }
+.preview-box .layer.flower{ top: -10px; }
+.preview-box .layer.stem{   top: 65px; }
+.preview-box .layer.pot{    top: 150px; }
 
-.preview-box .layer.flower{ top:-0.625rem; } /* -10px */
-.preview-box .layer.stem{   top:4.0625rem; } /* 65px */
-.preview-box .layer.pot{    top:9.375rem; }  /* 150px */
-
-/* =========================
-   ✅ 툴팁
-========================= */
+/* 툴팁 */
 .tooltip{
   position:absolute;
-  background:var(--bg);
-  border:0.125rem solid var(--fg);
-  color:var(--fg);
-  padding:0.5rem 0.625rem;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  color:#231d1a;
+  padding:10px 12px;
   line-height:1.25;
   display:none;
   pointer-events:none;
-  min-width:7.5rem;  /* 120px */
-  max-width:13.75rem;/* 220px */
+  min-width:150px;
+  max-width:260px;
   z-index:20;
 }
-.tooltip .msg{
-  font-weight:700;
-  font-size:0.75rem; /* 12px */
-  margin-bottom:0.25rem;
-}
-.tooltip .from{
-  font-weight:700;
-  font-size:0.625rem; /* 10px */
-  opacity:0.85;
-}
+.tooltip .msg{ font-weight:700; font-size:14px; margin-bottom:6px; }
+.tooltip .from{ font-weight:700; font-size:12px; opacity:0.85; }
 
-/* =========================
-   ✅ 모달
-========================= */
+/* 모달 */
 .modal{
-  position:fixed;
-  inset:0;
-  z-index:999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(229,227,227,0.80);
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(229,227,227,0.95);
   backdrop-filter: blur(2px);
 }
 .modal.show{ display:flex; }
-
 .modal-card{
-  width:17.5rem; /* 280px */
-  background:var(--bg);
-  border:0.125rem solid var(--fg);
-  box-shadow:0 0.625rem 1.875rem rgba(0,0,0,0.08);
-  padding:0.875rem;
+  width: 320px;
+  background: #e5e3e3;
+  border: 2px solid #231d1a;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 16px;
 }
 .modal-msg{
-  font-size:0.875rem; /* 14px */
+  font-size:16px;
   line-height:1.4;
   font-weight:700;
-  background:var(--bg);
-  padding:0.625rem;
+  background:#e5e3e3;
+  padding:12px;
 }
 .modal-btn{
   width:100%;
-  margin-top:0.625rem;
-  padding:0.75rem;
-  background:var(--bg);
-  border:0.125rem solid var(--fg);
+  margin-top:12px;
+  padding:14px;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
   font-weight:800;
   cursor:pointer;
-  font-size:0.8125rem; /* 13px */
+  font-size:14px;
 }
 
-/* ✅ 레이어 */
-#canvas{ z-index:0; }
-.panel, .preview-panel, .modal{ z-index:10; }
+/* 레이어 */
+#canvas{ position:absolute; inset:0; z-index:0; }
+.panel, .preview-panel, .modal{ position:fixed; z-index:10; }
 
-/* ✅ 기본은 프리뷰 숨김 */
-.preview-panel { display:none; }
-
-/* ✅ 옵션창 열렸을 때만 프리뷰 보이기 */
-.panel.open + .preview-panel { display:block; }
+.stage, #canvas canvas {
+  cursor: none;
+}
