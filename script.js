@@ -245,10 +245,10 @@ function draw(){
     const p = pots[i];
     drawPot(p);
 
-    if(wx > p.x - 45 && wx < p.x + 45 &&
-       wy > p.y - 165 && wy < p.y + 8){
-      hovered = i;
-    }
+    if(wx > p.x - 80 && wx < p.x + 80 &&
+      wy > p.y - 300 && wy < p.y + 20){
+     hovered = i;
+   }
   }
 
   pop();
@@ -299,11 +299,11 @@ function drawPot(p){
   push();
   translate(p.x, p.y);
 
-  const BASE = 70;   // 🔥 60 → 70 (적당히 키움, 80보단 작음)
+  const BASE = 120; // ✅ 광장 화분 크기 업(대략 1.5배 느낌)
 
-  drawImageKeepRatio(POTS[p.potIdx],     0,    0, BASE);
-  drawImageKeepRatio(STEMS[p.stemIdx],   0,  -60, BASE);
-  drawImageKeepRatio(FLOWERS[p.flowerIdx],0, -120, BASE);
+  drawImageKeepRatio(POTS[p.potIdx],      0,    0, BASE);
+  drawImageKeepRatio(STEMS[p.stemIdx],    0,  -90, BASE);   // ✅ 줄기 위치도 비율 맞춰 조정
+  drawImageKeepRatio(FLOWERS[p.flowerIdx],0, -180, BASE);   // ✅ 꽃 위치도 비율 맞춰 조정
 
   pop();
 }
