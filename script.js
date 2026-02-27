@@ -299,11 +299,11 @@ function drawPot(p){
   push();
   translate(p.x, p.y);
 
-  const BASE = 60;   // ✅ 광장 화분 크기: 80 → 60 (조금 줄임)
+  const BASE = 70;   // 🔥 60 → 70 (적당히 키움, 80보단 작음)
 
   drawImageKeepRatio(POTS[p.potIdx],     0,    0, BASE);
-  drawImageKeepRatio(STEMS[p.stemIdx],   0,  -52, BASE);
-  drawImageKeepRatio(FLOWERS[p.flowerIdx],0, -105, BASE);
+  drawImageKeepRatio(STEMS[p.stemIdx],   0,  -60, BASE);
+  drawImageKeepRatio(FLOWERS[p.flowerIdx],0, -120, BASE);
 
   pop();
 }
