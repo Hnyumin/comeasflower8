@@ -1,4 +1,4 @@
-let cursorSize = 24;   // 원 지름
+// script.js
 
 /* =========================
    ✅ Supabase 연결
@@ -32,7 +32,7 @@ let selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
 let camX = 0, camY = 0;
 let isPanning = false;
 
-/* 🔥 5초 메시지용 */
+/* 5초 툴팁 고정 */
 let pinnedIndex = -1;
 let pinnedExpireAt = 0;
 const PIN_DURATION = 5000;
@@ -42,14 +42,13 @@ let FLOWERS = new Array(7).fill(null);
 let STEMS   = new Array(7).fill(null);
 let POTS    = new Array(7).fill(null);
 
-/* 화분 크기(모니터 따라 자동) */
+/* 화분 크기 */
 let BASE_SIZE = 80;
 
 /* =========================
    ✅ DOM
 ========================= */
 const panel = document.getElementById("panel");
-const panelBody = document.getElementById("panelBody");
 const dropdownBtn = document.getElementById("dropdownBtn");
 const sendBtn = document.getElementById("sendBtn");
 
@@ -64,10 +63,21 @@ const prevPot    = document.getElementById("prevPot");
 const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modalClose");
 
+const cursorEl = document.querySelector(".custom-cursor");
+
+/* =========================
+   ✅ 커스텀 커서 (DOM)
+========================= */
+window.addEventListener("mousemove", (e)=>{
+  if(!cursorEl) return;
+  cursorEl.style.left = e.clientX + "px";
+  cursorEl.style.top  = e.clientY + "px";
+});
+
 /* =========================
    ✅ 드롭다운
 ========================= */
-dropdownBtn.addEventListener("click", ()=>{
+dropdownBtn?.addEventListener("click", ()=>{
   const isOpen = panel.classList.toggle("open");
   dropdownBtn.textContent = isOpen ? "▲" : "▼";
 });
@@ -75,22 +85,23 @@ dropdownBtn.addEventListener("click", ()=>{
 /* =========================
    ✅ 모달
 ========================= */
-function openModal(){ modal.classList.add("show"); }
-function closeModal(){ modal.classList.remove("show"); }
-modalClose.addEventListener("click", closeModal);
-modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
+function openModal(){ modal?.classList.add("show"); }
+function closeModal(){ modal?.classList.remove("show"); }
+
+modalClose?.addEventListener("click", closeModal);
+modal?.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
 /* =========================
    ✅ 프리뷰
 ========================= */
 function updatePreview(){
-  if(selected.flowerIdx === -1){ prevFlower.style.display="none"; }
+  if(selected.flowerIdx === -1) prevFlower.style.display="none";
   else { prevFlower.style.display="block"; prevFlower.src = FLOWER_PATHS[selected.flowerIdx]; }
 
-  if(selected.stemIdx === -1){ prevStem.style.display="none"; }
+  if(selected.stemIdx === -1) prevStem.style.display="none";
   else { prevStem.style.display="block"; prevStem.src = STEM_PATHS[selected.stemIdx]; }
 
-  if(selected.potIdx === -1){ prevPot.style.display="none"; }
+  if(selected.potIdx === -1) prevPot.style.display="none";
   else { prevPot.style.display="block"; prevPot.src = POT_PATHS[selected.potIdx]; }
 }
 updatePreview();
@@ -104,6 +115,7 @@ document.querySelectorAll(".options").forEach((row)=>{
     if(!btn) return;
 
     const type = row.dataset.type;
+
     row.querySelectorAll(".option").forEach(el=>el.classList.remove("selected"));
     btn.classList.add("selected");
 
@@ -114,89 +126,23 @@ document.querySelectorAll(".options").forEach((row)=>{
 
 /* =========================
    ✅ 화분 크기 자동 계산
-   - 화면 높이 기준(아이맥에서 너무 작아 보이는 문제 해결)
 ========================= */
 function updateBaseSize(){
-  const raw = height * 0.085;        // 화면 높이의 8.5%
-  BASE_SIZE = constrain(raw, 60, 120); // 너무 작/큰 것 제한
+  const raw = height * 0.07;
+  BASE_SIZE = constrain(raw, 60, 120);
 }
 
 /* =========================
-   ✅ 겹침 판정(사각형)
-   - BASE_SIZE 기반으로 히트박스도 같이 스케일
+   ✅ 겹침 판정
 ========================= */
 function isOverlapping(x, y){
-  const hitW = BASE_SIZE * 1.6; // 가로
-  const hitH = BASE_SIZE * 3.0; // 세로(꽃까지 포함)
+  const hitW = BASE_SIZE * 1.6;
+  const hitH = BASE_SIZE * 3.0;
   for(const p of pots){
-    const overlapX = Math.abs(x - p.x) < hitW;
-    const overlapY = Math.abs(y - p.y) < hitH;
-    if(overlapX && overlapY) return true;
+    if(Math.abs(x - p.x) < hitW && Math.abs(y - p.y) < hitH) return true;
   }
   return false;
 }
-
-/* =========================
-   ✅ 전송 (겹치지 않는 위치 찾기)
-========================= */
-sendBtn.addEventListener("click", async ()=>{
-
-  if(selected.flowerIdx === -1 || selected.stemIdx === -1 || selected.potIdx === -1){
-    openModal();
-    return;
-  }
-
-  let x, y;
-  let attempts = 0;
-
-  do{
-    x = random(160, width - 160) - camX;
-    y = random(260, height - 120) - camY;
-    attempts++;
-  }while(isOverlapping(x, y) && attempts < 250);
-
-  const newPot = {
-    x, y,
-    flowerIdx: selected.flowerIdx,
-    stemIdx: selected.stemIdx,
-    potIdx: selected.potIdx,
-    name: nameInput.value.trim() || "익명",
-    msg: msgInput.value.trim() || ""
-  };
-
-  // 화면에 바로 추가
-  pots.push(newPot);
-
-  // Supabase 저장
-  const { error } = await sb.from("pots").insert([{
-    x: newPot.x,
-    y: newPot.y,
-    flower_idx: newPot.flowerIdx,
-    stem_idx: newPot.stemIdx,
-    pot_idx: newPot.potIdx,
-    name: newPot.name,
-    msg: newPot.msg
-  }]);
-
-  if(error) console.error(error);
-
-  // 5초 툴팁 고정
-  pinnedIndex = pots.length - 1;
-  pinnedExpireAt = millis() + PIN_DURATION;
-
-  // 드롭다운 닫기
-  panel.classList.remove("open");
-  dropdownBtn.textContent = "▼";
-
-  // 입력칸 비우기
-  nameInput.value = "";
-  msgInput.value  = "";
-
-  // 선택 리셋
-  selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
-  document.querySelectorAll(".option.selected").forEach(el=>el.classList.remove("selected"));
-  updatePreview();
-});
 
 /* =========================
    ✅ Supabase 불러오기
@@ -224,6 +170,59 @@ async function loadFromSupabase(){
 }
 
 /* =========================
+   ✅ 전송
+========================= */
+sendBtn?.addEventListener("click", async ()=>{
+
+  if(selected.flowerIdx === -1 || selected.stemIdx === -1 || selected.potIdx === -1){
+    openModal();
+    return;
+  }
+
+  let x, y, attempts = 0;
+  do{
+    x = random(160, width - 160) - camX;
+    y = random(260, height - 120) - camY;
+    attempts++;
+  }while(isOverlapping(x, y) && attempts < 250);
+
+  const newPot = {
+    x, y,
+    flowerIdx: selected.flowerIdx,
+    stemIdx: selected.stemIdx,
+    potIdx: selected.potIdx,
+    name: nameInput.value.trim() || "익명",
+    msg: msgInput.value.trim() || ""
+  };
+
+  pots.push(newPot);
+
+  const { error } = await sb.from("pots").insert([{
+    x: newPot.x,
+    y: newPot.y,
+    flower_idx: newPot.flowerIdx,
+    stem_idx: newPot.stemIdx,
+    pot_idx: newPot.potIdx,
+    name: newPot.name,
+    msg: newPot.msg
+  }]);
+  if(error) console.error(error);
+
+  pinnedIndex = pots.length - 1;
+  pinnedExpireAt = millis() + PIN_DURATION;
+
+  panel.classList.remove("open");
+  dropdownBtn.textContent = "▼";
+
+  nameInput.value = "";
+  msgInput.value  = "";
+
+  selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
+  document.querySelectorAll(".option.selected").forEach(el=>el.classList.remove("selected"));
+  updatePreview();
+});
+
+/* =========================
    ✅ p5 preload
 ========================= */
 function preload(){
@@ -247,7 +246,6 @@ function setup(){
 
   pixelDensity(2);
   imageMode(CENTER);
-  cursor("grab");
 
   updateBaseSize();
   loadFromSupabase();
@@ -280,7 +278,6 @@ function draw(){
     const p = pots[i];
     drawPot(p);
 
-    // hover 판정(대략 영역)
     if(wx > p.x - BASE_SIZE*0.75 && wx < p.x + BASE_SIZE*0.75 &&
        wy > p.y - BASE_SIZE*2.1  && wy < p.y + BASE_SIZE*0.2){
       hovered = i;
@@ -289,6 +286,7 @@ function draw(){
 
   pop();
 
+  if(!tooltip) return;
   tooltip.style.display = "none";
 
   const showIndex = (hovered !== -1) ? hovered : pinnedIndex;
@@ -303,17 +301,18 @@ function draw(){
     const sy = p.y + camY;
 
     tooltip.style.display = "block";
-    tooltip.style.left = `${sx + BASE_SIZE*0.7}px`;
+    tooltip.style.left = `${sx + BASE_SIZE*0.5}px`;
     tooltip.style.top  = `${sy - BASE_SIZE*2.1}px`;
     tooltip.innerHTML = `
-      <div class="msg">${escapeHtml(p.msg || "(메세지 없음)")}</div>
+      <div class="msg">${escapeHtml(p.msg || "")}</div>
       <div class="from">from. ${escapeHtml(p.name || "익명")}</div>
     `;
   }
 }
 
 /* =========================
-   ✅ 비율 유지
+   ✅ 화분 그리기
+   (간격 조절은 여기 y값들)
 ========================= */
 function drawImageKeepRatio(img, x, y, targetW){
   if(!img || img.width===0 || img.height===0) return;
@@ -327,31 +326,24 @@ function drawPot(p){
 
   const BASE = BASE_SIZE;
 
-  // ✅ stem 위치 "살짝 위로"는 여기 숫자만 조절하면 됨
-  // -BASE*0.90 → 더 위로 올리고 싶으면 0.95~1.05 사이로 올려봐
-  drawImageKeepRatio(POTS[p.potIdx],   0,  BASE*0.10,   BASE);
-  drawImageKeepRatio(STEMS[p.stemIdx], 0, -BASE*1.00,   BASE);
-  drawImageKeepRatio(FLOWERS[p.flowerIdx], 0, -BASE*2.00, BASE);
+  // ✅ 간격 조절 포인트 (y값만 수정)
+  // pot:  BASE*0.10
+  // stem: -BASE*1.00  (더 위로 올리려면 -1.05, -1.10)
+  // flower:-BASE*2.00 (더 위로 올리려면 -2.05, -2.10)
+  drawImageKeepRatio(POTS[p.potIdx],       0,  BASE*0.048, BASE);
+  drawImageKeepRatio(STEMS[p.stemIdx],     0, -BASE*1.00, BASE);
+  drawImageKeepRatio(FLOWERS[p.flowerIdx], 0, -BASE*1.90, BASE);
 
-  /* =========================
-   ✅ 커스텀 투명 원 커서
-========================= */
-resetMatrix();   // 🔥 좌표계 초기화
-
-noStroke();
-fill(35, 29, 26, 70);
-circle(mouseX, mouseY, cursorSize);
   pop();
 }
 
 /* =========================
-   ✅ 드래그
+   ✅ 드래그 (패닝)
 ========================= */
 function mousePressed(){
   const el = document.elementFromPoint(mouseX, mouseY);
   if(el && (el.closest(".panel") || el.closest(".preview-panel") || el.closest(".modal"))) return;
   isPanning = true;
-  cursor("grabbing");
 }
 function mouseDragged(){
   if(!isPanning) return;
@@ -360,7 +352,6 @@ function mouseDragged(){
 }
 function mouseReleased(){
   isPanning = false;
-  cursor("grab");
 }
 
 /* =========================
@@ -373,4 +364,5 @@ function escapeHtml(str){
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+    
 }
