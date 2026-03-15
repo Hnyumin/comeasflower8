@@ -36,7 +36,7 @@ html, body{
   z-index:0;
 }
 
-/* 데스크탑 패널 */
+/* 패널 */
 .panel{
   position:fixed;
   left:1.25rem;
@@ -70,9 +70,9 @@ html, body{
   padding:0.75rem;
   background:var(--fg);
   border:0.125rem solid var(--fg);
+  color:var(--bg);
   font-weight:900;
   margin-bottom:1rem;
-  color:var(--bg);
 }
 
 .panel-body{ display:none; }
@@ -156,7 +156,7 @@ textarea{
   font-weight:700;
 }
 
-/* 데스크탑 프리뷰 */
+/* 프리뷰 */
 .preview-panel{
   position:fixed;
   left: calc(1.25rem + 20rem + 0.75rem);
@@ -188,8 +188,8 @@ textarea{
   display:none;
 }
 .preview-box .layer.flower{ top:-0.3rem; }
-.preview-box .layer.stem{   top:4.0625rem; }
-.preview-box .layer.pot{    top:9.18rem; }
+.preview-box .layer.stem{ top:4.0625rem; }
+.preview-box .layer.pot{ top:9.18rem; }
 
 /* 툴팁 */
 .tooltip{
@@ -204,8 +204,8 @@ textarea{
   min-width:7.5rem;
   max-width:13.75rem;
   z-index:25;
-  transform: scale(var(--tooltip-scale));
-  transform-origin: top left;
+  transform:scale(var(--tooltip-scale));
+  transform-origin:top left;
 }
 .tooltip .msg{
   font-weight:700;
@@ -227,7 +227,7 @@ textarea{
   align-items:center;
   justify-content:center;
   background:rgba(229,227,227,0.80);
-  backdrop-filter: blur(2px);
+  backdrop-filter:blur(2px);
 }
 .modal.show{ display:flex; }
 
@@ -257,31 +257,29 @@ textarea{
 
 /* 커서 */
 .custom-cursor{
-  position: fixed;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(35, 29, 26, 0.5);
-  pointer-events: none;
-  z-index: 99999;
-  transform: translate(-50%, -50%);
-  left: -9999px;
-  top: -9999px;
+  position:fixed;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:rgba(35, 29, 26, 0.5);
+  pointer-events:none;
+  z-index:99999;
+  transform:translate(-50%, -50%);
+  left:-9999px;
+  top:-9999px;
 }
 
-/* 모바일 FAB / 시트 */
+/* 모바일 요소 기본 숨김 */
 .mobile-fab,
 .mobile-sheet-backdrop{
   display:none;
 }
 
-/* =========================
-   모바일
-========================= */
+/* 모바일 */
 @media (max-width: 768px){
 
   html{
-    font-size: 15px;
+    font-size:15px;
   }
 
   .preview-panel{
@@ -300,13 +298,13 @@ textarea{
     border-bottom:none;
     border-radius:1rem 1rem 0 0;
     padding:1rem 1rem 1.25rem 1rem;
-    transform: translateY(calc(100% - 3.75rem));
-    transition: transform 0.28s ease;
+    transform:translateY(calc(100% - 3.75rem));
+    transition:transform 0.28s ease;
     z-index:60;
   }
 
   .panel.open{
-    transform: translateY(0);
+    transform:translateY(0);
   }
 
   .panel h1{
@@ -360,19 +358,23 @@ textarea{
     font-size:1rem;
   }
 
+  /* 모바일 화살표 버튼 */
   .mobile-fab{
     display:block;
     position:fixed;
-    right:1rem;
+    left:50%;
     bottom:1rem;
+    transform:translateX(-50%);
     z-index:70;
+    width:3.25rem;
+    height:3.25rem;
     border:none;
+    border-radius:999px;
     background:var(--fg);
     color:var(--bg);
-    font-weight:700;
-    font-size:0.95rem;
-    padding:0.9rem 1rem;
-    border-radius:999px;
+    font-weight:900;
+    font-size:1.25rem;
+    line-height:1;
     box-shadow:0 0.5rem 1.5rem rgba(0,0,0,0.15);
   }
 
@@ -404,5 +406,12 @@ textarea{
   .modal-card{
     width:calc(100vw - 2rem);
     max-width:22rem;
+  }
+}
+
+/* 모바일에서는 커서 숨김 */
+@media (hover: none), (pointer: coarse){
+  .custom-cursor{
+    display:none !important;
   }
 }
