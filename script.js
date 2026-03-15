@@ -1,15 +1,7 @@
-// script.js
-
-/* =========================
-   ✅ Supabase 연결
-========================= */
 const SUPABASE_URL = "https://zsvsbrkphrbxazjordss.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzdnNicmtwaHJieGF6am9yZHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3NjU4NjYsImV4cCI6MjA4NzM0MTg2Nn0.AVYgmgtUtIjvSbtgr6k7_mkMrXiEatQFVNbbJVK3Zv0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* =========================
-   ✅ SVG 경로
-========================= */
 const FLOWER_PATHS = [
   "assets/flower01.svg","assets/flower02.svg","assets/flower03.svg",
   "assets/flower04.svg","assets/flower05.svg","assets/flower06.svg","assets/flower07.svg",
@@ -23,31 +15,22 @@ const POT_PATHS = [
   "assets/pot04.svg","assets/pot05.svg","assets/pot06.svg","assets/pot07.svg",
 ];
 
-/* =========================
-   ✅ 상태
-========================= */
 let pots = [];
 let selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
 
 let camX = 0, camY = 0;
 let isPanning = false;
 
-/* 5초 툴팁 고정 */
 let pinnedIndex = -1;
 let pinnedExpireAt = 0;
 const PIN_DURATION = 5000;
 
-/* 이미지 버퍼 */
 let FLOWERS = new Array(7).fill(null);
 let STEMS   = new Array(7).fill(null);
 let POTS    = new Array(7).fill(null);
 
-/* 화분 크기 */
 let BASE_SIZE = 80;
 
-/* =========================
-   ✅ DOM
-========================= */
 const panel = document.getElementById("panel");
 const dropdownBtn = document.getElementById("dropdownBtn");
 const sendBtn = document.getElementById("sendBtn");
@@ -64,36 +47,53 @@ const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modalClose");
 
 const cursorEl = document.querySelector(".custom-cursor");
+const mobileFab = document.getElementById("mobileFab");
+const mobileSheetBackdrop = document.getElementById("mobileSheetBackdrop");
 
-/* =========================
-   ✅ 커스텀 커서 (DOM)
-========================= */
+function isMobile(){
+  return window.matchMedia("(max-width: 768px)").matches;
+}
+
+/* 커서 */
 window.addEventListener("mousemove", (e)=>{
   if(!cursorEl) return;
   cursorEl.style.left = e.clientX + "px";
   cursorEl.style.top  = e.clientY + "px";
 });
 
-/* =========================
-   ✅ 드롭다운
-========================= */
+/* 패널 열고 닫기 */
+function openPanel(){
+  panel.classList.add("open");
+  if(dropdownBtn) dropdownBtn.textContent = "▲";
+  if(isMobile()) mobileSheetBackdrop?.classList.add("show");
+}
+function closePanel(){
+  panel.classList.remove("open");
+  if(dropdownBtn) dropdownBtn.textContent = "▼";
+  if(isMobile()) mobileSheetBackdrop?.classList.remove("show");
+}
+
 dropdownBtn?.addEventListener("click", ()=>{
-  const isOpen = panel.classList.toggle("open");
-  dropdownBtn.textContent = isOpen ? "▲" : "▼";
+  if(panel.classList.contains("open")) closePanel();
+  else openPanel();
 });
 
-/* =========================
-   ✅ 모달
-========================= */
+mobileFab?.addEventListener("click", ()=>{
+  openPanel();
+});
+
+mobileSheetBackdrop?.addEventListener("click", ()=>{
+  closePanel();
+});
+
+/* 모달 */
 function openModal(){ modal?.classList.add("show"); }
 function closeModal(){ modal?.classList.remove("show"); }
 
 modalClose?.addEventListener("click", closeModal);
 modal?.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-/* =========================
-   ✅ 프리뷰
-========================= */
+/* 프리뷰 */
 function updatePreview(){
   if(selected.flowerIdx === -1) prevFlower.style.display="none";
   else { prevFlower.style.display="block"; prevFlower.src = FLOWER_PATHS[selected.flowerIdx]; }
@@ -106,16 +106,13 @@ function updatePreview(){
 }
 updatePreview();
 
-/* =========================
-   ✅ 옵션 선택
-========================= */
+/* 옵션 선택 */
 document.querySelectorAll(".options").forEach((row)=>{
   row.addEventListener("click",(e)=>{
     const btn = e.target.closest(".option");
     if(!btn) return;
 
     const type = row.dataset.type;
-
     row.querySelectorAll(".option").forEach(el=>el.classList.remove("selected"));
     btn.classList.add("selected");
 
@@ -124,17 +121,11 @@ document.querySelectorAll(".options").forEach((row)=>{
   });
 });
 
-/* =========================
-   ✅ 화분 크기 자동 계산
-========================= */
 function updateBaseSize(){
   const raw = height * 0.07;
   BASE_SIZE = constrain(raw, 60, 120);
 }
 
-/* =========================
-   ✅ 겹침 판정
-========================= */
 function isOverlapping(x, y){
   const hitW = BASE_SIZE * 1.6;
   const hitH = BASE_SIZE * 3.0;
@@ -144,9 +135,6 @@ function isOverlapping(x, y){
   return false;
 }
 
-/* =========================
-   ✅ Supabase 불러오기
-========================= */
 async function loadFromSupabase(){
   const { data, error } = await sb
     .from("pots")
@@ -169,9 +157,7 @@ async function loadFromSupabase(){
   }));
 }
 
-/* =========================
-   ✅ 전송
-========================= */
+/* 전송 */
 sendBtn?.addEventListener("click", async ()=>{
 
   if(selected.flowerIdx === -1 || selected.stemIdx === -1 || selected.potIdx === -1){
@@ -211,8 +197,7 @@ sendBtn?.addEventListener("click", async ()=>{
   pinnedIndex = pots.length - 1;
   pinnedExpireAt = millis() + PIN_DURATION;
 
-  panel.classList.remove("open");
-  dropdownBtn.textContent = "▼";
+  closePanel();
 
   nameInput.value = "";
   msgInput.value  = "";
@@ -222,9 +207,6 @@ sendBtn?.addEventListener("click", async ()=>{
   updatePreview();
 });
 
-/* =========================
-   ✅ p5 preload
-========================= */
 function preload(){
   const safeLoad = (path, arr, i)=>{
     loadImage(path, img=>arr[i]=img, ()=>arr[i]=null);
@@ -236,9 +218,6 @@ function preload(){
   }
 }
 
-/* =========================
-   ✅ p5 setup
-========================= */
 function setup(){
   const stage = document.querySelector(".stage");
   const c = createCanvas(stage.clientWidth, stage.clientHeight);
@@ -255,11 +234,12 @@ function windowResized(){
   const stage = document.querySelector(".stage");
   resizeCanvas(stage.clientWidth, stage.clientHeight);
   updateBaseSize();
+
+  if(!isMobile()){
+    mobileSheetBackdrop?.classList.remove("show");
+  }
 }
 
-/* =========================
-   ✅ draw
-========================= */
 function draw(){
   background("#e5e3e3");
 
@@ -293,8 +273,6 @@ function draw(){
 
   if(showIndex !== -1){
     const p = pots[showIndex];
-
-    // 이름/메시지 둘 다 없으면 툴팁 안 띄움
     if(!p.msg && (!p.name || p.name === "익명")) return;
 
     const sx = p.x + camX;
@@ -310,10 +288,6 @@ function draw(){
   }
 }
 
-/* =========================
-   ✅ 화분 그리기
-   (간격 조절은 여기 y값들)
-========================= */
 function drawImageKeepRatio(img, x, y, targetW){
   if(!img || img.width===0 || img.height===0) return;
   const ratio = img.height / img.width;
@@ -326,10 +300,6 @@ function drawPot(p){
 
   const BASE = BASE_SIZE;
 
-  // ✅ 간격 조절 포인트 (y값만 수정)
-  // pot:  BASE*0.10
-  // stem: -BASE*1.00  (더 위로 올리려면 -1.05, -1.10)
-  // flower:-BASE*2.00 (더 위로 올리려면 -2.05, -2.10)
   drawImageKeepRatio(POTS[p.potIdx],       0,  BASE*0.048, BASE);
   drawImageKeepRatio(STEMS[p.stemIdx],     0, -BASE*1.00, BASE);
   drawImageKeepRatio(FLOWERS[p.flowerIdx], 0, -BASE*1.90, BASE);
@@ -337,26 +307,46 @@ function drawPot(p){
   pop();
 }
 
-/* =========================
-   ✅ 드래그 (패닝)
-========================= */
+/* 모바일 터치 시 툴팁 표시 */
 function mousePressed(){
   const el = document.elementFromPoint(mouseX, mouseY);
   if(el && (el.closest(".panel") || el.closest(".preview-panel") || el.closest(".modal"))) return;
+
+  let tappedIndex = -1;
+
+  for(let i=0;i<pots.length;i++){
+    const p = pots[i];
+    const wx = mouseX - camX;
+    const wy = mouseY - camY;
+
+    if(
+      wx > p.x - BASE_SIZE*0.75 && wx < p.x + BASE_SIZE*0.75 &&
+      wy > p.y - BASE_SIZE*2.1  && wy < p.y + BASE_SIZE*0.2
+    ){
+      tappedIndex = i;
+      break;
+    }
+  }
+
+  if(isMobile() && tappedIndex !== -1){
+    pinnedIndex = tappedIndex;
+    pinnedExpireAt = millis() + 2500;
+    return;
+  }
+
   isPanning = true;
 }
+
 function mouseDragged(){
   if(!isPanning) return;
   camX += movedX;
   camY += movedY;
 }
+
 function mouseReleased(){
   isPanning = false;
 }
 
-/* =========================
-   ✅ 안전 문자열
-========================= */
 function escapeHtml(str){
   return String(str)
     .replaceAll("&","&amp;")
@@ -364,5 +354,4 @@ function escapeHtml(str){
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
-    
 }
