@@ -4,6 +4,8 @@
   --fg: #231d1a;
   --preview-size: 4.875rem;
   --tooltip-width: 12rem;
+
+  /* 모바일 */
   --mobile-peek: 9.2rem;
   --mobile-open: min(76svh, 34rem);
 }
@@ -334,6 +336,7 @@ textarea{
     font-size:15px;
   }
 
+  /* 프리뷰 제거 */
   .preview-panel{
     display:none !important;
   }
@@ -427,14 +430,16 @@ textarea{
     font-size:1rem;
   }
 
+  /* 패널 우상단 모서리 쪽 버튼 */
   .mobile-fab{
     display:block;
     position:fixed;
-    left:50%;
-    bottom:calc(env(safe-area-inset-bottom, 0px) + 1rem);
+    right:1rem;
+    left:auto;
+    bottom:calc(var(--mobile-peek) - 1.625rem);
     width:3.25rem;
     height:3.25rem;
-    transform:translateX(-50%);
+    transform:none;
     border:none;
     border-radius:999px;
     background:var(--fg);
@@ -450,6 +455,7 @@ textarea{
   }
 
   .panel.open ~ .mobile-fab{
+    right:1rem;
     bottom:calc(var(--mobile-open) - 1.625rem);
   }
 
