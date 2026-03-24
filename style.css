@@ -12,7 +12,7 @@ html, body{
 #canvas{ position:absolute; inset:0; z-index:0; }
 #canvas canvas{ position:absolute; inset:0; }
 
-/* ===== 패널 (데스크탑 그대로 유지) ===== */
+/* ===== 패널 ===== */
 .panel{
   position:fixed;
   left:20px; top:20px;
@@ -22,8 +22,8 @@ html, body{
   border:2px solid #231d1a;
   box-shadow:0 10px 30px rgba(0,0,0,0.08);
   padding:12px;
-  border-radius:0;
 }
+
 .panel h1{ font-size:16px; margin:0 0 10px 0; }
 
 .desc{
@@ -48,7 +48,7 @@ html, body{
   color:#e5e3e3;
 }
 
-/* 바디 */
+/* ===== 드롭다운 ===== */
 .panel-body{ display:none; }
 .panel.open .panel-body{ display:block; }
 
@@ -65,17 +65,20 @@ html, body{
 }
 .options::-webkit-scrollbar{ display:none; }
 
+/* 🔥 데스크탑 옵션 살짝 키움 */
 .option{
-  width:34px; height:46px;
+  width:38px;   /* 34 → 38 */
+  height:52px;  /* 46 → 52 */
   display:flex;
   align-items:center;
   justify-content:center;
   background:#e5e3e3;
   border:none;
 }
+
 .option img{
-  width:100%;
-  height:100%;
+  width:105%;
+  height:105%;
   object-fit:contain;
 }
 
@@ -108,7 +111,7 @@ textarea{ height:90px; resize:none; }
   font-weight:700;
 }
 
-/* ===== 프리뷰 (원래대로 복구됨) ===== */
+/* ===== 프리뷰 ===== */
 .preview-panel{
   position:fixed;
   left: calc(20px + 320px + 12px);
@@ -123,7 +126,7 @@ textarea{ height:90px; resize:none; }
 
 .preview-box{
   width:100%;
-  height:260px; /* 원래 크기 */
+  height:260px;
   position:relative;
   overflow:hidden;
 }
@@ -142,15 +145,66 @@ textarea{ height:90px; resize:none; }
 .preview-box .layer.stem{ top:65px; }
 .preview-box .layer.pot{ top:150px; }
 
-/* ===== 모바일만 수정 ===== */
+/* ===== 툴팁 ===== */
+.tooltip{
+  position:absolute;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  padding:10px 12px;
+  display:none;
+  pointer-events:none;
+}
+
+.tooltip .msg{ font-weight:700; font-size:14px; }
+.tooltip .from{ font-size:12px; }
+
+/* ===== 모달 ===== */
+.modal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(229,227,227,0.95);
+}
+.modal.show{ display:flex; }
+
+.modal-card{
+  width:320px;
+  background:#e5e3e3;
+  border:2px solid #231d1a;
+  padding:16px;
+}
+
+.modal-btn{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+}
+
+/* ===== 커서 ===== */
+.custom-cursor{
+  position:fixed;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:rgba(35, 29, 26, 0.5);
+  pointer-events:none;
+  z-index:99999;
+  transform:translate(-50%, -50%);
+  left:-9999px;
+  top:-9999px;
+}
+
+/* =========================
+   📱 모바일만 수정
+========================= */
 @media (max-width:768px){
 
   html{ font-size:16px; }
 
-  /* 프리뷰 제거 */
   .preview-panel{ display:none !important; }
 
-  /* 패널 */
   .panel{
     left:0;
     right:0;
@@ -161,33 +215,26 @@ textarea{ height:90px; resize:none; }
     transform:translateY(calc(100% - 11.5rem));
     transition:0.3s;
     overflow:hidden;
-
-    /* 🔥 버튼 클릭 가능하게 */
     pointer-events:auto;
+
+    display:flex;
+    flex-direction:column;
   }
 
   .panel.open{
     transform:translateY(0);
   }
 
-  /* 🔥 버튼을 맨 위로 이동 */
+  /* 🔥 버튼을 맨 위로 */
   .dropdown-btn{
     order:-1;
     margin-bottom:8px;
     font-size:18px;
-
-    /* 🔥 클릭 안되던 문제 해결 */
-    position:relative;
-    z-index:999;
     pointer-events:auto;
+    z-index:999;
   }
 
-  /* 🔥 순서 */
-  .panel{
-    display:flex;
-    flex-direction:column;
-  }
-
+  /* 🔥 패널 내부 스크롤 */
   .panel-body{
     display:none;
   }
@@ -215,23 +262,12 @@ textarea{ height:90px; resize:none; }
     height:85%;
   }
 
-  /* 🔥 화살표 방향 반전 */
-  .dropdown-btn{
-    transform:rotate(180deg);
-  }
-
-  .panel.open .dropdown-btn{
-    transform:rotate(0deg);
-  }
-
-  /* 입력 확대 방지 */
+  /* 🔥 입력 확대 방지 */
   input, textarea{
     font-size:16px;
   }
 
   textarea{ height:70px; }
 
-  .send-btn{
-    margin-bottom:10px;
-  }
+  .send-btn{ margin-bottom:10px; }
 }
