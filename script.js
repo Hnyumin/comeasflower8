@@ -77,17 +77,13 @@ window.addEventListener("pointerdown", (e)=>{
 /* =========================
    패널 토글
 ========================= */
-function syncToggleButtons(){
+ function syncToggleButtons(){
   const isOpen = panel.classList.contains("open");
 
   if(dropdownBtn){
-    dropdownBtn.textContent = isOpen ? "▲" : "▼";
-    dropdownBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-  }
-
-  if(mobileFab){
-    mobileFab.textContent = isOpen ? "▲" : "▼";
-    mobileFab.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    dropdownBtn.textContent = isMobile()
+      ? (isOpen ? "▼" : "▲")   // 모바일
+      : (isOpen ? "▲" : "▼");  // 데스크탑
   }
 }
 
