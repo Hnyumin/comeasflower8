@@ -22,23 +22,24 @@ html, body{
   cursor:none !important;
 }
 
-/* 광장 */
 .stage{
   position:fixed;
   inset:0;
   background:var(--bg);
   z-index:0;
 }
+
 #canvas{
   position:absolute;
   inset:0;
   z-index:0;
 }
+
 #canvas canvas{
   z-index:0;
 }
 
-/* 패널 */
+/* desktop panel */
 .panel{
   position:fixed;
   left:1.25rem;
@@ -84,6 +85,7 @@ html, body{
 .panel.open .panel-body{ display:block; }
 
 .group{ margin-bottom:0.625rem; }
+
 .group-title{
   font-weight:700;
   font-size:0.875rem;
@@ -98,6 +100,7 @@ html, body{
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
+
 .options::-webkit-scrollbar{
   height:0;
   display:none;
@@ -167,7 +170,6 @@ textarea{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* 프리뷰 */
 .preview-panel{
   position:fixed;
   left: calc(1.25rem + 20rem + 0.75rem);
@@ -180,6 +182,7 @@ textarea{
   padding:0.75rem;
   display:none;
 }
+
 .panel.open + .preview-panel{ display:block; }
 
 .preview-box{
@@ -198,11 +201,12 @@ textarea{
   height:auto;
   display:none;
 }
+
 .preview-box .layer.flower{ top:-0.3rem; }
 .preview-box .layer.stem{ top:4.0625rem; }
 .preview-box .layer.pot{ top:9.18rem; }
 
-/* 툴팁 */
+/* fixed-size tooltip */
 .tooltip{
   position:absolute;
   background:var(--bg);
@@ -212,23 +216,27 @@ textarea{
   line-height:1.25;
   display:none;
   pointer-events:none;
-  min-width:7.5rem;
-  max-width:13.75rem;
+  width:12rem;
+  min-width:12rem;
+  max-width:12rem;
   z-index:25;
-  transform:none;
+  transform:none !important;
+  word-break:keep-all;
+  overflow-wrap:break-word;
 }
+
 .tooltip .msg{
   font-weight:700;
   font-size:0.75rem;
   margin-bottom:0.25rem;
 }
+
 .tooltip .from{
   font-weight:700;
   font-size:0.625rem;
   opacity:0.85;
 }
 
-/* 모달 */
 .modal{
   position:fixed;
   inset:0;
@@ -239,6 +247,7 @@ textarea{
   background:rgba(229,227,227,0.80);
   backdrop-filter:blur(2px);
 }
+
 .modal.show{ display:flex; }
 
 .modal-card{
@@ -248,6 +257,7 @@ textarea{
   box-shadow:0 0.625rem 1.875rem rgba(0,0,0,0.08);
   padding:0.875rem;
 }
+
 .modal-msg{
   font-size:0.875rem;
   line-height:1.4;
@@ -255,6 +265,7 @@ textarea{
   background:var(--bg);
   padding:0.625rem;
 }
+
 .modal-btn{
   width:100%;
   margin-top:0.625rem;
@@ -268,7 +279,6 @@ textarea{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* 커서 */
 .custom-cursor{
   position:fixed;
   width:24px;
@@ -282,15 +292,13 @@ textarea{
   top:-9999px;
 }
 
-/* 모바일 요소 기본 숨김 */
 .mobile-fab,
 .mobile-sheet-backdrop{
   display:none;
 }
 
-/* 모바일 */
+/* mobile */
 @media (max-width: 768px){
-
   html{
     font-size:15px;
   }
@@ -314,10 +322,12 @@ textarea{
     transform:translateY(calc(100% - 3.75rem));
     transition:transform 0.28s ease;
     z-index:260;
+    pointer-events:none;
   }
 
   .panel.open{
     transform:translateY(0);
+    pointer-events:auto;
   }
 
   .panel h1{
@@ -371,14 +381,13 @@ textarea{
     font-size:1rem;
   }
 
-  /* 모바일 화살표 버튼 */
   .mobile-fab{
     display:block;
     position:fixed;
     left:50%;
     bottom:1rem;
     transform:translateX(-50%);
-    z-index:280;
+    z-index:9999;
     width:3.25rem;
     height:3.25rem;
     border:none;
@@ -406,11 +415,11 @@ textarea{
     display:block;
   }
 
-  /* ✅ 모바일에서도 툴팁 크기 고정 */
   .tooltip{
-    min-width:7.5rem;
-    max-width:13.75rem;
-    transform:none;
+    width:12rem;
+    min-width:12rem;
+    max-width:12rem;
+    transform:none !important;
   }
 
   .tooltip .msg{
@@ -427,7 +436,6 @@ textarea{
   }
 }
 
-/* 모바일에서는 커서 숨김 */
 @media (hover: none), (pointer: coarse){
   .custom-cursor{
     display:none !important;
