@@ -1,13 +1,7 @@
-/* =========================
-   Supabase
-========================= */
 const SUPABASE_URL = "https://zsvsbrkphrbxazjordss.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_KEY_HERE";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzdnNicmtwaHJieGF6am9yZHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3NjU4NjYsImV4cCI6MjA4NzM0MTg2Nn0.AVYgmgtUtIjvSbtgr6k7_mkMrXiEatQFVNbbJVK3Zv0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* =========================
-   SVG 경로
-========================= */
 const FLOWER_PATHS = [
   "assets/flower01.svg","assets/flower02.svg","assets/flower03.svg",
   "assets/flower04.svg","assets/flower05.svg","assets/flower06.svg","assets/flower07.svg",
@@ -21,9 +15,6 @@ const POT_PATHS = [
   "assets/pot04.svg","assets/pot05.svg","assets/pot06.svg","assets/pot07.svg",
 ];
 
-/* =========================
-   상태
-========================= */
 let pots = [];
 let selected = { flowerIdx:-1, stemIdx:-1, potIdx:-1 };
 
@@ -35,18 +26,14 @@ let lastTouchY = 0;
 
 let pinnedIndex = -1;
 let pinnedExpireAt = 0;
-const PIN_DURATION = 2500;
+const PIN_DURATION = 5000;
 
-let BASE_SIZE = 80;
-
-/* 이미지 버퍼 */
 let FLOWERS = new Array(7).fill(null);
 let STEMS   = new Array(7).fill(null);
 let POTS    = new Array(7).fill(null);
 
-/* =========================
-   DOM
-========================= */
+let BASE_SIZE = 80;
+
 const panel = document.getElementById("panel");
 const dropdownBtn = document.getElementById("dropdownBtn");
 const sendBtn = document.getElementById("sendBtn");
@@ -62,21 +49,30 @@ const prevPot    = document.getElementById("prevPot");
 const modal = document.getElementById("modal");
 const modalClose = document.getElementById("modalClose");
 
-/* =========================
-   공통
-========================= */
+const cursorEl = document.querySelector(".custom-cursor");
+const mobileFab = document.getElementById("mobileFab");
+const mobileSheetBackdrop = document.getElementById("mobileSheetBackdrop");
+
 function isMobile(){
   return window.matchMedia("(max-width: 768px)").matches;
 }
 
-function escapeHtml(str){
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+/* =========================
+   커서
+========================= */
+function moveCursorTo(x, y){
+  if(!cursorEl) return;
+  cursorEl.style.left = `${x}px`;
+  cursorEl.style.top = `${y}px`;
 }
+
+window.addEventListener("pointermove", (e)=>{
+  moveCursorTo(e.clientX, e.clientY);
+});
+
+window.addEventListener("pointerdown", (e)=>{
+  moveCursorTo(e.clientX, e.clientY);
+});
 
 /* =========================
    패널 토글
@@ -85,10 +81,26 @@ function syncToggleButtons(){
   const isOpen = panel.classList.contains("open");
 
   if(dropdownBtn){
-    dropdownBtn.textContent = isMobile()
-      ? (isOpen ? "▼" : "▲")
-      : (isOpen ? "▲" : "▼");
+    dropdownBtn.textContent = isOpen ? "▲" : "▼";
+    dropdownBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
   }
+
+  if(mobileFab){
+    mobileFab.textContent = isOpen ? "▲" : "▼";
+    mobileFab.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+}
+
+function openPanel(){
+  panel.classList.add("open");
+  if(isMobile()) mobileSheetBackdrop?.classList.add("show");
+  syncToggleButtons();
+}
+
+function closePanel(){
+  panel.classList.remove("open");
+  mobileSheetBackdrop?.classList.remove("show");
+  syncToggleButtons();
 }
 
 function togglePanel(e){
@@ -96,12 +108,22 @@ function togglePanel(e){
     e.preventDefault();
     e.stopPropagation();
   }
-  panel.classList.toggle("open");
-  syncToggleButtons();
+
+  if(panel.classList.contains("open")) closePanel();
+  else openPanel();
 }
 
 dropdownBtn?.addEventListener("click", togglePanel);
 dropdownBtn?.addEventListener("touchstart", togglePanel, { passive:false });
+
+mobileFab?.addEventListener("click", togglePanel);
+mobileFab?.addEventListener("touchstart", togglePanel, { passive:false });
+
+mobileSheetBackdrop?.addEventListener("click", closePanel);
+mobileSheetBackdrop?.addEventListener("touchstart", (e)=>{
+  e.preventDefault();
+  closePanel();
+}, { passive:false });
 
 /* =========================
    모달
@@ -109,6 +131,7 @@ dropdownBtn?.addEventListener("touchstart", togglePanel, { passive:false });
 function openModal(){
   modal?.classList.add("show");
 }
+
 function closeModal(){
   modal?.classList.remove("show");
 }
@@ -127,8 +150,6 @@ modal?.addEventListener("click", (e)=>{
    프리뷰
 ========================= */
 function updatePreview(){
-  if(!prevFlower || !prevStem || !prevPot) return;
-
   if(selected.flowerIdx === -1){
     prevFlower.style.display = "none";
   } else {
@@ -156,7 +177,9 @@ updatePreview();
    옵션 선택
 ========================= */
 document.querySelectorAll(".options").forEach((row)=>{
-  row.addEventListener("click",(e)=>{
+  row.addEventListener("click", (e)=>{
+    e.stopPropagation();
+
     const btn = e.target.closest(".option");
     if(!btn) return;
 
@@ -167,10 +190,14 @@ document.querySelectorAll(".options").forEach((row)=>{
     selected[type + "Idx"] = parseInt(btn.dataset.value, 10);
     updatePreview();
   });
+
+  row.addEventListener("touchstart", (e)=>{
+    e.stopPropagation();
+  }, { passive:true });
 });
 
 /* =========================
-   크기 / 충돌
+   크기/충돌
 ========================= */
 function updateBaseSize(){
   const raw = height * 0.07;
@@ -190,7 +217,7 @@ function isOverlapping(x, y){
 }
 
 /* =========================
-   DB 불러오기
+   Supabase 불러오기
 ========================= */
 async function loadFromSupabase(){
   const { data, error } = await sb
@@ -199,7 +226,7 @@ async function loadFromSupabase(){
     .order("created_at", { ascending: true });
 
   if(error){
-    console.error("Supabase load error:", error);
+    console.error(error);
     return;
   }
 
@@ -246,10 +273,8 @@ async function handleSend(e){
     msg: msgInput.value.trim() || ""
   };
 
-  /* 화면에는 바로 추가 */
   pots.push(newPot);
 
-  /* DB 저장 */
   const { error } = await sb.from("pots").insert([{
     x: newPot.x,
     y: newPot.y,
@@ -260,15 +285,12 @@ async function handleSend(e){
     msg: newPot.msg
   }]);
 
-  if(error){
-    console.error("Supabase insert error:", error);
-  }
+  if(error) console.error(error);
 
   pinnedIndex = pots.length - 1;
   pinnedExpireAt = millis() + PIN_DURATION;
 
-  panel.classList.remove("open");
-  syncToggleButtons();
+  closePanel();
 
   nameInput.value = "";
   msgInput.value = "";
@@ -282,18 +304,11 @@ sendBtn?.addEventListener("click", handleSend);
 sendBtn?.addEventListener("touchstart", handleSend, { passive:false });
 
 /* =========================
-   preload
+   p5 preload/setup
 ========================= */
 function preload(){
   const safeLoad = (path, arr, i)=>{
-    loadImage(
-      path,
-      img => arr[i] = img,
-      err => {
-        console.error("Image load error:", path, err);
-        arr[i] = null;
-      }
-    );
+    loadImage(path, img => arr[i] = img, () => arr[i] = null);
   };
 
   for(let i=0;i<7;i++){
@@ -303,9 +318,6 @@ function preload(){
   }
 }
 
-/* =========================
-   setup / resize
-========================= */
 function setup(){
   const stage = document.querySelector(".stage");
   const c = createCanvas(stage.clientWidth, stage.clientHeight);
@@ -315,36 +327,21 @@ function setup(){
   imageMode(CENTER);
 
   updateBaseSize();
-  syncToggleButtons();
   loadFromSupabase();
+  syncToggleButtons();
+  closePanel();
 }
 
 function windowResized(){
   const stage = document.querySelector(".stage");
   resizeCanvas(stage.clientWidth, stage.clientHeight);
   updateBaseSize();
-}
 
-/* =========================
-   히트 테스트
-========================= */
-function hitTestPot(screenX, screenY){
-  const wx = screenX - camX;
-  const wy = screenY - camY;
-
-  for(let i = pots.length - 1; i >= 0; i--){
-    const p = pots[i];
-
-    const within =
-      wx > p.x - BASE_SIZE * 0.75 &&
-      wx < p.x + BASE_SIZE * 0.75 &&
-      wy > p.y - BASE_SIZE * 2.1 &&
-      wy < p.y + BASE_SIZE * 0.25;
-
-    if(within) return i;
+  if(!isMobile()){
+    mobileSheetBackdrop?.classList.remove("show");
   }
 
-  return -1;
+  syncToggleButtons();
 }
 
 /* =========================
@@ -360,49 +357,45 @@ function draw(){
   push();
   translate(camX, camY);
 
+  let hovered = -1;
+  const wx = mouseX - camX;
+  const wy = mouseY - camY;
+
   for(let i=0;i<pots.length;i++){
-    drawPot(pots[i]);
+    const p = pots[i];
+    drawPot(p);
+
+    if(
+      wx > p.x - BASE_SIZE * 0.75 && wx < p.x + BASE_SIZE * 0.75 &&
+      wy > p.y - BASE_SIZE * 2.1  && wy < p.y + BASE_SIZE * 0.2
+    ){
+      hovered = i;
+    }
   }
 
   pop();
 
-  let showIndex = -1;
-
-  if(!isMobile()){
-    const hovered = hitTestPot(mouseX, mouseY);
-    showIndex = hovered !== -1 ? hovered : pinnedIndex;
-  } else {
-    showIndex = pinnedIndex;
-  }
-
-  renderTooltip(showIndex);
-}
-
-function renderTooltip(index){
   if(!tooltip) return;
+  tooltip.style.display = "none";
 
-  if(index === -1 || !pots[index]){
-    tooltip.style.display = "none";
-    return;
+  const showIndex = (hovered !== -1) ? hovered : pinnedIndex;
+
+  if(showIndex !== -1){
+    const p = pots[showIndex];
+
+    if(!p.msg && (!p.name || p.name === "익명")) return;
+
+    const sx = p.x + camX;
+    const sy = p.y + camY;
+
+    tooltip.style.display = "block";
+    tooltip.style.left = `${sx + BASE_SIZE * 0.5}px`;
+    tooltip.style.top  = `${sy - BASE_SIZE * 2.1}px`;
+    tooltip.innerHTML = `
+      <div class="msg">${escapeHtml(p.msg || "")}</div>
+      <div class="from">from. ${escapeHtml(p.name || "익명")}</div>
+    `;
   }
-
-  const p = pots[index];
-
-  if(!p.msg && (!p.name || p.name === "익명")){
-    tooltip.style.display = "none";
-    return;
-  }
-
-  const sx = p.x + camX;
-  const sy = p.y + camY;
-
-  tooltip.style.display = "block";
-  tooltip.style.left = `${sx + BASE_SIZE * 0.55}px`;
-  tooltip.style.top  = `${sy - BASE_SIZE * 2.05}px`;
-  tooltip.innerHTML = `
-    <div class="msg">${escapeHtml(p.msg || "")}</div>
-    <div class="from">from. ${escapeHtml(p.name || "익명")}</div>
-  `;
 }
 
 /* =========================
@@ -415,13 +408,6 @@ function drawImageKeepRatio(img, x, y, targetW){
 }
 
 function drawPot(p){
-  if(
-    p.flowerIdx == null || p.stemIdx == null || p.potIdx == null ||
-    !FLOWERS[p.flowerIdx] || !STEMS[p.stemIdx] || !POTS[p.potIdx]
-  ){
-    return;
-  }
-
   push();
   translate(p.x, p.y);
 
@@ -435,7 +421,7 @@ function drawPot(p){
 }
 
 /* =========================
-   UI 클릭/터치 판별
+   UI 터치/클릭 판별
 ========================= */
 function isUIElementAtClient(clientX, clientY){
   const el = document.elementFromPoint(clientX, clientY);
@@ -453,7 +439,7 @@ function isUIElementAtClient(clientX, clientY){
 }
 
 /* =========================
-   데스크톱 마우스
+   데스크탑 마우스
 ========================= */
 function mousePressed(event){
   const clientX = event?.clientX ?? 0;
@@ -462,14 +448,6 @@ function mousePressed(event){
   if(isUIElementAtClient(clientX, clientY)){
     isPanning = false;
     return;
-  }
-
-  const hit = hitTestPot(mouseX, mouseY);
-  if(hit !== -1){
-    pinnedIndex = hit;
-    pinnedExpireAt = millis() + PIN_DURATION;
-    isPanning = false;
-    return false;
   }
 
   isPanning = true;
@@ -506,12 +484,6 @@ function touchStarted(event){
     return;
   }
 
-  const hit = hitTestPot(clientX, clientY);
-  if(hit !== -1){
-    pinnedIndex = hit;
-    pinnedExpireAt = millis() + PIN_DURATION;
-  }
-
   isPanning = true;
   lastTouchX = clientX;
   lastTouchY = clientY;
@@ -539,4 +511,16 @@ function touchMoved(event){
 
 function touchEnded(){
   isPanning = false;
+}
+
+/* =========================
+   문자열 이스케이프
+========================= */
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
