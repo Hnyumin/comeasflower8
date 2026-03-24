@@ -1,5 +1,5 @@
 const SUPABASE_URL = "https://zsvsbrkphrbxazjordss.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzdnNicmtwaHJieGF6am9yZHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3NjU4NjYsImV4cCI6MjA4NzM0MTg2Nn0.AVYgmgtUtIjvSbtgr6k7_mkMrXiEatQFVNbbJVK3Zv0";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBiYXNlIiwicmVmIjoienN2c2Jya3BocmJ4YXpqb3Jkc3MiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3MTc2NTg2NiwiZXhwIjoyMDg3MzQxODY2fQ.AVYgmgtUtIjvSbtgr6k7_mkMrXiEatQFVNbbJVK3Zv0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const FLOWER_PATHS = [
@@ -26,7 +26,7 @@ let lastTouchY = 0;
 
 let pinnedIndex = -1;
 let pinnedExpireAt = 0;
-const PIN_DURATION = 5000;
+const PIN_DURATION = 2500;
 
 let FLOWERS = new Array(7).fill(null);
 let STEMS   = new Array(7).fill(null);
@@ -81,7 +81,12 @@ function syncToggleButtons(){
   const isOpen = panel.classList.contains("open");
 
   if(dropdownBtn){
-    dropdownBtn.textContent = isOpen ? "▲" : "▼";
+    // 데스크탑: 닫힘 ▼ / 열림 ▲
+    // 모바일: 닫힘 ▲ / 열림 ▼
+    dropdownBtn.textContent = isMobile()
+      ? (isOpen ? "▼" : "▲")
+      : (isOpen ? "▲" : "▼");
+
     dropdownBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
   }
 
@@ -150,6 +155,8 @@ modal?.addEventListener("click", (e)=>{
    프리뷰
 ========================= */
 function updatePreview(){
+  if(!prevFlower || !prevStem || !prevPot) return;
+
   if(selected.flowerIdx === -1){
     prevFlower.style.display = "none";
   } else {
@@ -304,7 +311,7 @@ sendBtn?.addEventListener("click", handleSend);
 sendBtn?.addEventListener("touchstart", handleSend, { passive:false });
 
 /* =========================
-   p5 preload/setup
+   preload / setup
 ========================= */
 function preload(){
   const safeLoad = (path, arr, i)=>{
@@ -345,6 +352,28 @@ function windowResized(){
 }
 
 /* =========================
+   히트 테스트
+========================= */
+function hitTestPot(screenX, screenY){
+  const wx = screenX - camX;
+  const wy = screenY - camY;
+
+  for(let i = pots.length - 1; i >= 0; i--){
+    const p = pots[i];
+
+    const within =
+      wx > p.x - BASE_SIZE * 0.75 &&
+      wx < p.x + BASE_SIZE * 0.75 &&
+      wy > p.y - BASE_SIZE * 2.1 &&
+      wy < p.y + BASE_SIZE * 0.25;
+
+    if(within) return i;
+  }
+
+  return -1;
+}
+
+/* =========================
    draw
 ========================= */
 function draw(){
@@ -357,45 +386,53 @@ function draw(){
   push();
   translate(camX, camY);
 
-  let hovered = -1;
-  const wx = mouseX - camX;
-  const wy = mouseY - camY;
-
   for(let i=0;i<pots.length;i++){
-    const p = pots[i];
-    drawPot(p);
-
-    if(
-      wx > p.x - BASE_SIZE * 0.75 && wx < p.x + BASE_SIZE * 0.75 &&
-      wy > p.y - BASE_SIZE * 2.1  && wy < p.y + BASE_SIZE * 0.2
-    ){
-      hovered = i;
-    }
+    drawPot(pots[i]);
   }
 
   pop();
 
-  if(!tooltip) return;
-  tooltip.style.display = "none";
+  let showIndex = -1;
 
-  const showIndex = (hovered !== -1) ? hovered : pinnedIndex;
-
-  if(showIndex !== -1){
-    const p = pots[showIndex];
-
-    if(!p.msg && (!p.name || p.name === "익명")) return;
-
-    const sx = p.x + camX;
-    const sy = p.y + camY;
-
-    tooltip.style.display = "block";
-    tooltip.style.left = `${sx + BASE_SIZE * 0.5}px`;
-    tooltip.style.top  = `${sy - BASE_SIZE * 2.1}px`;
-    tooltip.innerHTML = `
-      <div class="msg">${escapeHtml(p.msg || "")}</div>
-      <div class="from">from. ${escapeHtml(p.name || "익명")}</div>
-    `;
+  if(!isMobile()){
+    const hovered = hitTestPot(mouseX, mouseY);
+    if(hovered !== -1){
+      showIndex = hovered;
+    } else if(pinnedIndex !== -1){
+      showIndex = pinnedIndex;
+    }
+  } else {
+    showIndex = pinnedIndex;
   }
+
+  renderTooltip(showIndex);
+}
+
+function renderTooltip(index){
+  if(!tooltip) return;
+
+  if(index === -1 || !pots[index]){
+    tooltip.style.display = "none";
+    return;
+  }
+
+  const p = pots[index];
+
+  if(!p.msg && (!p.name || p.name === "익명")){
+    tooltip.style.display = "none";
+    return;
+  }
+
+  const sx = p.x + camX;
+  const sy = p.y + camY;
+
+  tooltip.style.display = "block";
+  tooltip.style.left = `${sx + BASE_SIZE * 0.55}px`;
+  tooltip.style.top  = `${sy - BASE_SIZE * 2.05}px`;
+  tooltip.innerHTML = `
+    <div class="msg">${escapeHtml(p.msg || "")}</div>
+    <div class="from">from. ${escapeHtml(p.name || "익명")}</div>
+  `;
 }
 
 /* =========================
@@ -421,7 +458,7 @@ function drawPot(p){
 }
 
 /* =========================
-   UI 터치/클릭 판별
+   UI 요소 판별
 ========================= */
 function isUIElementAtClient(clientX, clientY){
   const el = document.elementFromPoint(clientX, clientY);
@@ -448,6 +485,14 @@ function mousePressed(event){
   if(isUIElementAtClient(clientX, clientY)){
     isPanning = false;
     return;
+  }
+
+  const hit = hitTestPot(mouseX, mouseY);
+  if(hit !== -1){
+    pinnedIndex = hit;
+    pinnedExpireAt = millis() + PIN_DURATION;
+    isPanning = false;
+    return false;
   }
 
   isPanning = true;
@@ -484,6 +529,12 @@ function touchStarted(event){
     return;
   }
 
+  const hit = hitTestPot(clientX, clientY);
+  if(hit !== -1){
+    pinnedIndex = hit;
+    pinnedExpireAt = millis() + PIN_DURATION;
+  }
+
   isPanning = true;
   lastTouchX = clientX;
   lastTouchY = clientY;
@@ -514,7 +565,7 @@ function touchEnded(){
 }
 
 /* =========================
-   문자열 이스케이프
+   문자열 escape
 ========================= */
 function escapeHtml(str){
   return String(str)
