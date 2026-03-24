@@ -333,7 +333,7 @@ textarea{
 @media (max-width: 768px){
 
   html{
-    font-size:15px;
+    font-size:14px;
   }
 
   /* 프리뷰 제거 */
@@ -346,9 +346,12 @@ textarea{
     right:0;
     top:auto;
     bottom:0;
-    width:100%;
-    max-height:var(--mobile-open);
-    padding:1rem 1rem 1rem 1rem;
+    width:100vw;
+    max-width:100vw;
+    min-width:100vw;
+    height:auto;
+    max-height:none;
+    padding:0.9rem 0.9rem 1.1rem 0.9rem;
     border-left:none;
     border-right:none;
     border-bottom:none;
@@ -370,13 +373,15 @@ textarea{
   }
 
   .panel h1{
-    margin-bottom:0.65rem;
-    font-size:0.95rem;
+    margin-bottom:0.55rem;
+    font-size:0.92rem;
   }
 
   .desc{
-    margin-bottom:0.7rem;
-    font-size:0.82rem;
+    margin-bottom:0.55rem;
+    padding:0.5rem;
+    font-size:0.76rem;
+    line-height:1.35;
   }
 
   /* 모바일에서는 패널 내부 화살표 숨김 */
@@ -389,57 +394,68 @@ textarea{
     display:none !important;
   }
 
-  /* 열렸을 때만 옵션/입력 보이기 */
+  /* 열렸을 때만 전체 표시, 스크롤 없이 한 번에 */
   .panel.open .panel-body{
     display:block !important;
-    overflow-y:auto;
-    max-height:calc(var(--mobile-open) - var(--mobile-peek) + 1rem);
-    padding-bottom:5rem;
+    overflow:visible;
+    max-height:none;
+    padding-bottom:0;
+  }
+
+  .group{
+    margin-bottom:0.5rem;
   }
 
   .group-title{
-    font-size:0.95rem;
+    font-size:0.82rem;
+    margin-bottom:0.25rem;
   }
 
   .options{
-    gap:0.625rem;
-    padding-bottom:0.5rem;
+    gap:0.35rem;
+    padding-bottom:0.25rem;
+    overflow-x:visible;
+    flex-wrap:wrap;
   }
 
   .option{
-    width:2.8rem;
-    height:3.6rem;
+    width:2.3rem;
+    height:3rem;
   }
 
   label{
-    font-size:0.9rem;
+    margin-top:0.45rem;
+    font-size:0.82rem;
   }
 
   input,
   textarea{
-    font-size:0.9rem;
+    margin-top:0.18rem;
+    padding:0.32rem;
+    font-size:0.8rem;
   }
 
   textarea{
-    height:5rem;
+    height:4.2rem;
   }
 
   .send-btn{
-    margin-bottom:1rem;
-    padding:0.95rem 0.75rem;
-    font-size:1rem;
+    margin-top:0.5rem;
+    margin-bottom:0;
+    padding:0.82rem 0.7rem;
+    font-size:0.92rem;
   }
 
-  /* 패널 우상단 모서리 쪽 버튼 */
+  /* 버튼 다시 중앙 */
   .mobile-fab{
     display:block;
     position:fixed;
-    right:1rem;
-    left:auto;
+    left:50%;
+    right:auto;
     bottom:calc(var(--mobile-peek) - 1.625rem);
     width:3.25rem;
     height:3.25rem;
-    transform:none;
+    transform:translateX(-50%);
     border:none;
     border-radius:999px;
     background:var(--fg);
@@ -455,8 +471,10 @@ textarea{
   }
 
   .panel.open ~ .mobile-fab{
-    right:1rem;
-    bottom:calc(var(--mobile-open) - 1.625rem);
+    left:50%;
+    right:auto;
+    bottom:calc(100svh - min(76svh, 34rem) - 1.625rem);
+    transform:translateX(-50%);
   }
 
   .mobile-sheet-backdrop{
