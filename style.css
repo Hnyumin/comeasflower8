@@ -8,28 +8,14 @@ html, body{
 }
 
 /* ===== 광장 ===== */
-.stage{
-  position:fixed;
-  inset:0;
-  background:#e5e3e3;
-  z-index:0;
-}
-#canvas{
-  position:absolute;
-  inset:0;
-  z-index:0;
-}
-#canvas canvas{
-  position:absolute;
-  inset:0;
-  z-index:0;
-}
+.stage{ position:fixed; inset:0; background:#e5e3e3; z-index:0; }
+#canvas{ position:absolute; inset:0; z-index:0; }
+#canvas canvas{ position:absolute; inset:0; z-index:0; }
 
-/* ===== 패널 (데스크탑 원래 느낌 유지) ===== */
+/* ===== 패널 ===== */
 .panel{
   position:fixed;
-  left:20px;
-  top:20px;
+  left:20px; top:20px;
   z-index:10;
   width:320px;
   background:#e5e3e3;
@@ -55,7 +41,7 @@ html, body{
   font-weight:600;
 }
 
-/* 데스크탑 드롭다운 버튼 */
+/* 드롭다운 버튼 */
 .dropdown-btn{
   width:100%;
   padding:12px;
@@ -66,9 +52,6 @@ html, body{
   margin-bottom:16px;
   color:#e5e3e3;
   border-radius:0;
-  pointer-events:auto;
-  touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
 }
 
 /* 드롭다운 바디 */
@@ -89,20 +72,19 @@ html, body{
 }
 .options::-webkit-scrollbar{ display:none; }
 
-/* 데스크탑 옵션 살짝 확대 */
+/* 데스크톱 옵션 요소 살짝 확대 */
 .option{
-  width:38px;
-  height:52px;
+  width:40px;
+  height:54px;
+  border:none;
+  background:#e5e3e3;
+  padding:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:#e5e3e3;
-  border:none;
-  padding:0;
+  cursor:pointer;
   flex:0 0 auto;
   border-radius:0;
-  appearance:none;
-  cursor:pointer;
 }
 
 .option img{
@@ -131,9 +113,9 @@ input, textarea{
   padding:6px;
   margin-top:4px;
   font-size:12px;
+  outline:none;
   background:#e5e3e3;
   color:#231d1a;
-  outline:none;
   border-radius:0;
 }
 
@@ -142,7 +124,7 @@ textarea{
   resize:none;
 }
 
-/* ===== 버튼 ===== */
+/* ===== 전송 버튼 ===== */
 .send-btn{
   width:100%;
   margin-top:10px;
@@ -150,13 +132,13 @@ textarea{
   background:#231d1a;
   color:#e5e3e3;
   border:2px solid #231d1a;
-  font-weight:700;
-  font-size:16px;
-  border-radius:0;
   cursor:pointer;
+  font-size:16px;
+  font-weight:700;
+  border-radius:0;
 }
 
-/* ===== 프리뷰 (원래 크기 복구) ===== */
+/* ===== 프리뷰 ===== */
 .preview-panel{
   position:fixed;
   left:calc(20px + 320px + 12px);
@@ -170,15 +152,13 @@ textarea{
 }
 
 .preview-box{
-  width:100%;
-  height:260px;
+  height:260px; /* 원래 비율 복구 */
+  background:#e5e3e3;
   position:relative;
   overflow:hidden;
 }
 
-:root{
-  --preview-size: 78px;
-}
+:root{ --preview-size: 78px; }
 
 .preview-box .layer{
   position:absolute;
@@ -222,14 +202,14 @@ textarea{
 
 /* ===== 모달 ===== */
 .modal{
-  position:fixed;
-  inset:0;
-  z-index:999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(229,227,227,0.95);
-  backdrop-filter:blur(2px);
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(229,227,227,0.95);
+  backdrop-filter: blur(2px);
 }
 .modal.show{ display:flex; }
 
@@ -276,7 +256,7 @@ textarea{
   top:-9999px;
 }
 
-/* 데스크탑에서는 모바일용 요소 숨김 */
+/* 모바일 전용 요소 기본 숨김 */
 .mobile-fab,
 .mobile-sheet-backdrop{
   display:none;
@@ -293,7 +273,6 @@ textarea{
   /* 모바일에서는 프리뷰 제거 */
   .preview-panel{ display:none !important; }
 
-  /* 패널: 내부 버튼이 맨 위, 제목/설명 그 아래 */
   .panel{
     left:0;
     right:0;
@@ -323,6 +302,24 @@ textarea{
     transform:translateY(0);
   }
 
+  /* 모바일은 버튼이 맨 위 */
+  .dropdown-btn{
+    order:1;
+    display:block !important;
+    width:100% !important;
+    margin:0 0 0.55rem 0 !important;
+    padding:0.7rem !important;
+    background:#231d1a !important;
+    border:2px solid #231d1a !important;
+    color:#e5e3e3 !important;
+    font-size:18px !important;
+    font-weight:900 !important;
+    border-radius:0 !important;
+    position:relative;
+    z-index:999;
+    pointer-events:auto !important;
+  }
+
   .panel h1{
     order:2;
     margin:0 0 0.45rem 0;
@@ -338,30 +335,12 @@ textarea{
     line-height:1.32;
   }
 
-  /* 모바일 드롭다운 버튼: 맨 위 */
-  .dropdown-btn{
-    order:1;
-    display:block !important;
-    width:100% !important;
-    margin:0 0 0.55rem 0 !important;
-    padding:0.7rem !important;
-    background:#231d1a !important;
-    border:2px solid #231d1a !important;
-    color:#e5e3e3 !important;
-    font-size:18px !important;
-    font-weight:900 !important;
-    border-radius:0 !important;
-    pointer-events:auto !important;
-    position:relative;
-    z-index:999;
-  }
-
   .panel-body{
     order:4;
     display:none !important;
   }
 
-  /* 모바일 패널 내부 스크롤 허용 */
+  /* 모바일 패널 내부 스크롤 */
   .panel.open .panel-body{
     display:block !important;
     overflow-y:auto;
@@ -380,7 +359,7 @@ textarea{
     font-weight:700;
   }
 
-  /* 모바일 옵션 크게 + 균등 정렬 */
+  /* 모바일 옵션 */
   .options{
     display:grid;
     grid-template-columns:repeat(7, minmax(0, 1fr));
@@ -397,8 +376,6 @@ textarea{
     height:auto;
     aspect-ratio:34 / 46;
     flex:none;
-    border:none !important;
-    box-shadow:none;
   }
 
   .option img{
@@ -435,7 +412,7 @@ textarea{
     font-size:0.9rem;
   }
 
-  /* 모바일 전용 플로팅 버튼 완전 제거 */
+  /* 모바일 플로팅 버튼 제거 */
   .mobile-fab,
   .panel.open ~ .mobile-fab{
     display:none !important;
