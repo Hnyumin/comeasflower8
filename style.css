@@ -7,7 +7,7 @@
 
   /* 모바일 */
   --mobile-peek: 9.2rem;
-  --mobile-open: min(76svh, 34rem);
+  --mobile-open: 24.5rem;
 }
 
 html{
@@ -29,7 +29,6 @@ html, body{
   cursor:none !important;
 }
 
-/* ===== 광장 ===== */
 .stage{
   position:fixed;
   inset:0;
@@ -323,7 +322,6 @@ textarea{
   z-index:99999;
 }
 
-/* ===== 모바일 전용 요소 기본 숨김 ===== */
 .mobile-fab,
 .mobile-sheet-backdrop{
   display:none;
@@ -336,7 +334,6 @@ textarea{
     font-size:14px;
   }
 
-  /* 프리뷰 제거 */
   .preview-panel{
     display:none !important;
   }
@@ -347,11 +344,11 @@ textarea{
     top:auto;
     bottom:0;
     width:100vw;
-    max-width:100vw;
     min-width:100vw;
-    height:auto;
-    max-height:none;
-    padding:0.9rem 0.9rem 1.1rem 0.9rem;
+    max-width:100vw;
+    height:var(--mobile-open);
+    max-height:var(--mobile-open);
+    padding:0.9rem 0.9rem calc(0.9rem + env(safe-area-inset-bottom, 0px)) 0.9rem;
     border-left:none;
     border-right:none;
     border-bottom:none;
@@ -373,28 +370,25 @@ textarea{
   }
 
   .panel h1{
-    margin-bottom:0.55rem;
-    font-size:0.92rem;
+    margin-bottom:0.5rem;
+    font-size:0.9rem;
   }
 
   .desc{
-    margin-bottom:0.55rem;
+    margin-bottom:0.5rem;
     padding:0.5rem;
-    font-size:0.76rem;
-    line-height:1.35;
+    font-size:0.75rem;
+    line-height:1.32;
   }
 
-  /* 모바일에서는 패널 내부 화살표 숨김 */
   .dropdown-btn{
     display:none;
   }
 
-  /* 닫혀 있을 때는 설명까지만 */
   .panel-body{
     display:none !important;
   }
 
-  /* 열렸을 때만 전체 표시, 스크롤 없이 한 번에 */
   .panel.open .panel-body{
     display:block !important;
     overflow:visible;
@@ -403,47 +397,53 @@ textarea{
   }
 
   .group{
-    margin-bottom:0.5rem;
+    margin-bottom:0.42rem;
   }
 
   .group-title{
-    font-size:0.82rem;
-    margin-bottom:0.25rem;
-  }
-
-  .options{
-    gap:0.35rem;
-    padding-bottom:0.25rem;
-    overflow-x:visible;
-    flex-wrap:wrap;
-  }
-
-  .option{
-    width:2.3rem;
-    height:3rem;
-  }
-
-  label{
-    margin-top:0.45rem;
-    font-size:0.82rem;
-  }
-
-  input,
-  textarea{
-    margin-top:0.18rem;
-    padding:0.32rem;
+    margin-bottom:0.22rem;
     font-size:0.8rem;
   }
 
+  /* 한 줄에 7개 고르게 */
+  .options{
+    display:grid;
+    grid-template-columns:repeat(7, minmax(0, 1fr));
+    gap:0.28rem;
+    padding-bottom:0.2rem;
+    overflow:visible;
+    width:100%;
+  }
+
+  .option{
+    width:100%;
+    max-width:none;
+    height:auto;
+    aspect-ratio:34 / 46;
+  }
+
+  label{
+    margin-top:0.4rem;
+    font-size:0.8rem;
+  }
+
+  /* iOS 확대 방지 */
+  input,
   textarea{
-    height:4.2rem;
+    margin-top:0.16rem;
+    padding:0.32rem;
+    font-size:16px;
+  }
+
+  textarea{
+    height:3.9rem;
   }
 
   .send-btn{
-    margin-top:0.5rem;
+    margin-top:0.45rem;
     margin-bottom:0;
-    padding:0.82rem 0.7rem;
-    font-size:0.92rem;
+    padding:0.78rem 0.65rem;
+    font-size:0.88rem;
   }
 
   /* 버튼 다시 중앙 */
@@ -451,8 +451,7 @@ textarea{
     display:block;
     position:fixed;
     left:50%;
-    right:auto;
-    bottom:calc(var(--mobile-peek) - 1.625rem);
+    bottom:calc(var(--mobile-peek) - 1.625rem + env(safe-area-inset-bottom, 0px));
     width:3.25rem;
     height:3.25rem;
     transform:translateX(-50%);
@@ -471,10 +470,7 @@ textarea{
   }
 
   .panel.open ~ .mobile-fab{
-    left:50%;
-    right:auto;
-    bottom:calc(100svh - min(76svh, 34rem) - 1.625rem);
-    transform:translateX(-50%);
+    bottom:calc(var(--mobile-open) - 1.625rem + env(safe-area-inset-bottom, 0px));
   }
 
   .mobile-sheet-backdrop{
